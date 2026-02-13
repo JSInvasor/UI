@@ -1,17 +1,31 @@
--- DcusUI Series - Flow TabGroup Edition
--- Original by iksuwu / JSInvasor
--- Sidebar → Flow UI TabGroup Conversion + Blue Gradient Accent
--- All original features preserved
+-- DcusUI Series
+-- by iksuwu
+-- Morten UI
 
+-- New Update
+--[[
+[+] Keybind
+[=] Fix Scroll
+[+] Textbox
+[+] Window API ( UI Bind )
+[+] Setting Manager
+[+] Grid Background (by JSInvasor)
+[+] Collapsible Sections (by JSInvasor)
+[+] Collapsible Sidebar Categories (Flow-style)
+]]
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Player = game:GetService("Players").LocalPlayer
 
+-- gethui fallback
 local function getGuiParent()
 	local success, result = pcall(function()
-		if gethui then return gethui() end
+		if gethui then
+			return gethui()
+		end
 	end)
 	if success and result then return result end
+	
 	local success2, result2 = pcall(function()
 		if syn and syn.protect_gui then
 			local gui = Player:WaitForChild("PlayerGui")
@@ -20,28 +34,30 @@ local function getGuiParent()
 		end
 	end)
 	if success2 and result2 then return result2 end
+	
 	local success3, result3 = pcall(function()
 		return game:GetService("CoreGui")
 	end)
 	if success3 and result3 then return result3 end
+	
 	return Player:WaitForChild("PlayerGui")
 end
 
 local function Create(class, props, children)
 	local obj = Instance.new(class)
-	for k, v in pairs(props or {}) do obj[k] = v end
-	for _, c in pairs(children or {}) do c.Parent = obj end
+	for k,v in pairs(props or {}) do obj[k] = v end
+	for _,c in pairs(children or {}) do c.Parent = obj end
 	return obj
 end
 
--- Grid Background
+-- Grid Background Function (Simple Square Grid)
 local function CreateGridBackground(parent, config)
 	config = config or {}
 	local gridColor = config.GridColor or Color3.fromRGB(35, 35, 45)
 	local lineThickness = config.LineThickness or 1
 	local spacing = config.Spacing or 18
 	local lineTransparency = config.LineTransparency or 0.5
-
+	
 	local gridContainer = Create("Frame", {
 		Name = "GridBackground",
 		Size = UDim2.fromScale(1, 1),
@@ -50,8 +66,9 @@ local function CreateGridBackground(parent, config)
 		ZIndex = 1,
 		Parent = parent
 	})
-
-	for i = 0, math.ceil(500 / spacing) do
+	
+	local horizontalLines = math.ceil(400 / spacing) + 1
+	for i = 0, horizontalLines do
 		Create("Frame", {
 			Name = "HLine_" .. i,
 			Size = UDim2.new(1, 0, 0, lineThickness),
@@ -63,7 +80,9 @@ local function CreateGridBackground(parent, config)
 			Parent = gridContainer
 		})
 	end
-	for i = 0, math.ceil(700 / spacing) do
+	
+	local verticalLines = math.ceil(600 / spacing) + 1
+	for i = 0, verticalLines do
 		Create("Frame", {
 			Name = "VLine_" .. i,
 			Size = UDim2.new(0, lineThickness, 1, 0),
@@ -75,10 +94,20 @@ local function CreateGridBackground(parent, config)
 			Parent = gridContainer
 		})
 	end
+	
 	return gridContainer
 end
 
+-- Default section icon (fallback)
 local DEFAULT_SECTION_ICON = "rbxassetid://7733960981"
+
+-- Default category icons
+local DEFAULT_CATEGORY_ICONS = {
+	["Main"] = "rbxassetid://7733960981",
+	["Combat"] = "rbxassetid://7733960981",
+	["Player"] = "rbxassetid://7733960981",
+	["Misc"] = "rbxassetid://7733960981",
+}
 
 local Library = {}
 Library.__index = Library
@@ -91,6 +120,7 @@ function Library.SettingManager()
 			Title = "UI Settings",
 			Content = "Manage the interface settings and keybindings here."
 		})
+
 		tab:Keybind({
 			Name = "UI Toggle Key",
 			Default = Library.ToggleKey,
@@ -98,11 +128,12 @@ function Library.SettingManager()
 				Library.ToggleKey = New
 			end
 		})
+
 		tab:Button({
 			Name = "Unload UI",
 			Callback = function()
 				local core = getGuiParent()
-				local gui = core:FindFirstChild("DcusHub_FlowUI") or Player.PlayerGui:FindFirstChild("DcusHub_FlowUI")
+				local gui = core:FindFirstChild("DcusHub_v2.3 UI") or Player.PlayerGui:FindFirstChild("DcusHub_v2.3 UI")
 				if gui then gui:Destroy() end
 			end
 		})
@@ -112,19 +143,15 @@ end
 
 function Library:New(config)
 	local self = setmetatable({}, Library)
-	self.Open = true
-	self.Tabs = {}
-	self.TabButtons = {}
-	self.ActiveTab = nil
 
 	self.Gui = Create("ScreenGui", {
-		Name = "DcusHub_FlowUI",
+		Name = "DcusHub_v2.3 UI",
 		ResetOnSpawn = false,
 		Parent = getGuiParent()
 	})
 
 	self.Main = Create("Frame", {
-		Size = UDim2.fromOffset(580, 400),
+		Size = UDim2.fromOffset(550, 380),
 		Position = UDim2.fromScale(0.5, 0.5),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(15, 15, 20),
@@ -133,7 +160,7 @@ function Library:New(config)
 		Parent = self.Gui
 	}, {
 		Create("UICorner", {CornerRadius = UDim.new(0, 12)}),
-		Create("UIStroke", {Color = Color3.fromRGB(40, 40, 58), Thickness = 1.5})
+		Create("UIStroke", {Color = Color3.fromRGB(45, 45, 60), Thickness = 1.5})
 	})
 
 	local gridConfig = config.Grid or {}
@@ -144,61 +171,38 @@ function Library:New(config)
 		LineTransparency = gridConfig.Transparency or 0.5
 	})
 
-	-- ========== TOP BAR ==========
 	self.Top = Create("Frame", {
-		Size = UDim2.new(1, 0, 0, 50),
-		BackgroundColor3 = Color3.fromRGB(18, 18, 26),
-		BackgroundTransparency = 0.15,
+		Size = UDim2.new(1, 0, 0, 55),
+		BackgroundColor3 = Color3.fromRGB(20, 20, 28),
+		BackgroundTransparency = 0.3,
 		ZIndex = 2,
 		Parent = self.Main
 	}, {
-		Create("UICorner", {CornerRadius = UDim.new(0, 12)})
-	})
-
-	-- Top bar bottom border with blue gradient
-	local topBorderHolder = Create("Frame", {
-		Size = UDim2.new(1, 0, 0, 2),
-		Position = UDim2.new(0, 0, 1, -2),
-		BackgroundTransparency = 1,
-		ZIndex = 3,
-		ClipsDescendants = true,
-		Parent = self.Top
-	})
-	local topGradientLine = Create("Frame", {
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		BorderSizePixel = 0,
-		ZIndex = 3,
-		Parent = topBorderHolder
-	}, {
-		Create("UIGradient", {
-			Color = ColorSequence.new({
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 80, 200)),
-				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(60, 140, 255)),
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 80, 200))
-			}),
-			Transparency = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 0.6),
-				NumberSequenceKeypoint.new(0.5, 0),
-				NumberSequenceKeypoint.new(1, 0.6)
-			})
+		Create("UICorner", {CornerRadius = UDim.new(0, 12)}),
+		Create("Frame", {
+			Size = UDim2.new(1, 0, 0, 1),
+			Position = UDim2.new(0, 0, 1, -1),
+			BackgroundColor3 = Color3.fromRGB(60, 60, 80),
+			BackgroundTransparency = 0.5,
+			BorderSizePixel = 0,
 		})
 	})
 
-	-- macOS Buttons
+	-- macOS Style Buttons
 	local buttonContainer = Create("Frame", {
 		Size = UDim2.fromOffset(70, 20),
-		Position = UDim2.new(1, -80, 0, 15),
+		Position = UDim2.new(1, -80, 0, 17),
 		BackgroundTransparency = 1,
 		ZIndex = 10,
 		Parent = self.Top
 	})
 
 	local closeBtn = Create("TextButton", {
-		Size = UDim2.fromOffset(13, 13),
+		Size = UDim2.fromOffset(14, 14),
 		Position = UDim2.fromOffset(0, 3),
 		BackgroundColor3 = Color3.fromRGB(255, 95, 87),
-		Text = "", ZIndex = 11,
+		Text = "",
+		ZIndex = 11,
 		Parent = buttonContainer
 	}, {
 		Create("UICorner", {CornerRadius = UDim.new(1, 0)}),
@@ -206,10 +210,11 @@ function Library:New(config)
 	})
 
 	local minimizeBtn = Create("TextButton", {
-		Size = UDim2.fromOffset(13, 13),
-		Position = UDim2.fromOffset(20, 3),
+		Size = UDim2.fromOffset(14, 14),
+		Position = UDim2.fromOffset(22, 3),
 		BackgroundColor3 = Color3.fromRGB(255, 189, 46),
-		Text = "", ZIndex = 11,
+		Text = "",
+		ZIndex = 11,
 		Parent = buttonContainer
 	}, {
 		Create("UICorner", {CornerRadius = UDim.new(1, 0)}),
@@ -217,10 +222,11 @@ function Library:New(config)
 	})
 
 	local maximizeBtn = Create("TextButton", {
-		Size = UDim2.fromOffset(13, 13),
-		Position = UDim2.fromOffset(40, 3),
+		Size = UDim2.fromOffset(14, 14),
+		Position = UDim2.fromOffset(44, 3),
 		BackgroundColor3 = Color3.fromRGB(40, 205, 65),
-		Text = "", ZIndex = 11,
+		Text = "",
+		ZIndex = 11,
 		Parent = buttonContainer
 	}, {
 		Create("UICorner", {CornerRadius = UDim.new(1, 0)}),
@@ -234,7 +240,7 @@ function Library:New(config)
 	local IsMinimized = false
 	minimizeBtn.MouseButton1Click:Connect(function()
 		IsMinimized = not IsMinimized
-		local targetSize = IsMinimized and UDim2.fromOffset(580, 50) or UDim2.fromOffset(580, 400)
+		local targetSize = IsMinimized and UDim2.fromOffset(550, 55) or UDim2.fromOffset(550, 380)
 		TweenService:Create(self.Main, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
 			Size = targetSize
 		}):Play()
@@ -242,7 +248,8 @@ function Library:New(config)
 	end)
 
 	local IsMaximized = false
-	local originalSize = UDim2.fromOffset(580, 400)
+	local originalSize = UDim2.fromOffset(550, 380)
+	local originalPosition = UDim2.fromScale(0.5, 0.5)
 	maximizeBtn.MouseButton1Click:Connect(function()
 		IsMaximized = not IsMaximized
 		if IsMaximized then
@@ -253,16 +260,15 @@ function Library:New(config)
 		else
 			TweenService:Create(self.Main, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
 				Size = originalSize,
-				Position = UDim2.fromScale(0.5, 0.5)
+				Position = originalPosition
 			}):Play()
 		end
 	end)
 
-	-- Title
-	local titleOffset = 15
+	local titleOffset = 18
 	if config.Image then
-		Create("ImageLabel", {
-			Size = UDim2.fromOffset(28, 28),
+		local Logo = Create("ImageLabel", {
+			Size = UDim2.fromOffset(32, 32),
 			Position = UDim2.fromOffset(12, 11),
 			BackgroundTransparency = 1,
 			Image = config.Image,
@@ -272,39 +278,40 @@ function Library:New(config)
 		}, {
 			Create("UICorner", {CornerRadius = UDim.new(0, 6)})
 		})
-		titleOffset = 48
+		titleOffset = 52
 	end
 
 	Create("TextLabel", {
 		Text = config.Title or "Dcus Hub",
 		Font = Enum.Font.GothamBold,
-		TextSize = 17,
+		TextSize = 18,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextXAlignment = "Left",
 		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(titleOffset, 6),
-		Size = UDim2.new(0, 200, 0, 26),
+		Position = UDim2.fromOffset(titleOffset, 8),
+		Size = UDim2.new(0, 200, 0, 30),
 		ZIndex = 3,
 		Parent = self.Top
 	})
 
 	Create("TextLabel", {
-		Text = config.Footer or "Premium Interface • Flow UI",
+		Text = config.Footer or "Premium Interface • v2.3",
 		Font = Enum.Font.GothamMedium,
-		TextSize = 10,
-		TextColor3 = Color3.fromRGB(90, 100, 140),
+		TextSize = 11,
+		TextColor3 = Color3.fromRGB(100, 100, 130),
 		TextXAlignment = "Left",
 		BackgroundTransparency = 1,
-		Size = UDim2.new(0, 200, 0, 18),
-		Position = UDim2.fromOffset(titleOffset, 26),
+		Size = UDim2.new(0, 200, 0, 20),
+		Position = UDim2.fromOffset(titleOffset, 28),
 		ZIndex = 3,
 		Parent = self.Top
 	})
 
-	-- ========== CONTAINER (below top bar) ==========
+	local IsOpen = true
+
 	self.Container = Create("Frame", {
-		Size = UDim2.new(1, 0, 1, -50),
-		Position = UDim2.fromOffset(0, 50),
+		Size = UDim2.new(1, 0, 1, -55),
+		Position = UDim2.fromOffset(0, 55),
 		BackgroundTransparency = 1,
 		ClipsDescendants = true,
 		Visible = true,
@@ -312,93 +319,79 @@ function Library:New(config)
 		Parent = self.Main
 	})
 
-	-- ========== FLOW TAB BAR (replaces sidebar) ==========
-	local TabBar = Create("Frame", {
-		Name = "FlowTabBar",
-		Size = UDim2.new(1, -20, 0, 36),
-		Position = UDim2.fromOffset(10, 6),
+	self.Sidebar = Create("Frame", {
+		Size = UDim2.new(0, 150, 1, -16),
+		Position = UDim2.fromOffset(10, 8),
 		BackgroundColor3 = Color3.fromRGB(20, 20, 28),
-		ZIndex = 5,
+		ZIndex = 3,
 		Parent = self.Container
 	}, {
 		Create("UICorner", {CornerRadius = UDim.new(0, 10)}),
-		Create("UIStroke", {Color = Color3.fromRGB(38, 38, 55), Thickness = 1})
+		Create("UIStroke", {Color = Color3.fromRGB(45, 45, 60), Thickness = 1}),
 	})
 
-	-- Scrollable tab button holder
-	local TabScrollFrame = Create("ScrollingFrame", {
-		Name = "TabScroll",
-		Size = UDim2.new(1, -8, 1, -8),
-		Position = UDim2.fromOffset(4, 4),
+	-- Scrollable sidebar content
+	self.SidebarScroll = Create("ScrollingFrame", {
+		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		ScrollBarThickness = 0,
-		ScrollingDirection = Enum.ScrollingDirection.X,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
-		AutomaticCanvasSize = Enum.AutomaticSize.X,
-		ClipsDescendants = true,
-		ZIndex = 6,
-		Parent = TabBar
+		ScrollingDirection = Enum.ScrollingDirection.Y,
+		ZIndex = 5,
+		Parent = self.Sidebar
 	})
 
-	local TabLayout = Create("UIListLayout", {
-		FillDirection = Enum.FillDirection.Horizontal,
-		Padding = UDim.new(0, 4),
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		VerticalAlignment = Enum.VerticalAlignment.Center,
-		Parent = TabScrollFrame
-	})
-
-	-- Sliding blue gradient indicator under active tab
-	local TabIndicator = Create("Frame", {
-		Name = "ActiveIndicator",
-		Size = UDim2.new(0, 60, 0, 3),
-		Position = UDim2.new(0, 4, 1, -4),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		Visible = false,
-		ZIndex = 8,
-		Parent = TabBar
+	self.TabHolder = Create("Frame", {
+		Size = UDim2.new(1, 0, 0, 0), -- Auto-sized
+		BackgroundTransparency = 1,
+		ZIndex = 5,
+		Parent = self.SidebarScroll
 	}, {
-		Create("UICorner", {CornerRadius = UDim.new(1, 0)}),
-		Create("UIGradient", {
-			Color = ColorSequence.new({
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 100, 220)),
-				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(70, 160, 255)),
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 100, 220))
-			})
-		})
+		Create("UIListLayout", {Padding = UDim.new(0, 2), SortOrder = Enum.SortOrder.LayoutOrder}),
+		Create("UIPadding", {PaddingTop = UDim.new(0, 8), PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)})
 	})
 
-	self.TabBar = TabBar
-	self.TabScrollFrame = TabScrollFrame
-	self.TabLayout = TabLayout
-	self.TabIndicator = TabIndicator
+	-- Auto-size sidebar scroll canvas
+	local sidebarLayout = self.TabHolder:FindFirstChildOfClass("UIListLayout")
+	local function UpdateSidebarCanvas()
+		self.SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, sidebarLayout.AbsoluteContentSize.Y + 16)
+	end
+	sidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdateSidebarCanvas)
+	task.spawn(UpdateSidebarCanvas)
 
-	-- ========== PAGES AREA ==========
 	self.Pages = Create("Frame", {
-		Size = UDim2.new(1, -20, 1, -50),
-		Position = UDim2.fromOffset(10, 46),
+		Size = UDim2.new(1, -180, 1, -16),
+		Position = UDim2.fromOffset(170, 8),
 		BackgroundTransparency = 1,
 		ZIndex = 3,
 		Parent = self.Container
 	})
 
-	-- ========== DRAGGING ==========
+	-- Store active tab info for highlighting
+	self._activeTabBtn = nil
+	self._activeTabDot = nil
+
+	-- Dragging
 	do
 		local dragging, dragInput, dragStart, startPos
 		local function update(input)
 			local delta = input.Position - dragStart
 			self.Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 		end
+
 		self.Top.InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
 				dragging = true
 				dragStart = input.Position
 				startPos = self.Main.Position
 				input.Changed:Connect(function()
-					if input.UserInputState == Enum.UserInputState.End then dragging = false end
+					if input.UserInputState == Enum.UserInputState.End then
+						dragging = false
+					end
 				end)
 			end
 		end)
+
 		UIS.InputChanged:Connect(function(input)
 			if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 				update(input)
@@ -406,7 +399,6 @@ function Library:New(config)
 		end)
 	end
 
-	-- Toggle visibility
 	UIS.InputBegan:Connect(function(input, gpe)
 		if not gpe and input.KeyCode == Library.ToggleKey then
 			self.Open = not self.Open
@@ -414,7 +406,7 @@ function Library:New(config)
 		end
 	end)
 
-	-- ========== NOTIFY ==========
+	-- Notify
 	function Library:Notify(config)
 		local title = config.Title or "Notification"
 		local content = config.Content or "Notification Content"
@@ -452,14 +444,14 @@ function Library:New(config)
 			Parent = Holder
 		}, {
 			Create("UICorner", {CornerRadius = UDim.new(0, 8)}),
-			Create("UIStroke", {Color = Color3.fromRGB(60, 140, 255), Thickness = 1.2, Transparency = 1})
+			Create("UIStroke", {Color = Color3.fromRGB(80, 150, 255), Thickness = 1.2, Transparency = 1})
 		})
 
 		local TitleLabel = Create("TextLabel", {
 			Text = title:upper(),
 			Font = Enum.Font.GothamBold,
 			TextSize = 12,
-			TextColor3 = Color3.fromRGB(60, 140, 255),
+			TextColor3 = Color3.fromRGB(80, 150, 255),
 			BackgroundTransparency = 1,
 			TextTransparency = 1,
 			Position = UDim2.fromOffset(12, 8),
@@ -496,28 +488,38 @@ function Library:New(config)
 		local targetSizeY = ts.Y + 45
 		Notif.Position = UDim2.new(1, 50, 0, 0)
 
-		TweenService:Create(Notif, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+		local showTween = TweenService:Create(Notif, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
 			BackgroundTransparency = 0,
 			Size = UDim2.new(1, 0, 0, targetSizeY)
-		}):Play()
+		})
+
 		TweenService:Create(Notif.UIStroke, TweenInfo.new(0.5), {Transparency = 0}):Play()
 		TweenService:Create(TitleLabel, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 		TweenService:Create(Divider, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
 		TweenService:Create(ContentLabel, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
 
+		showTween:Play()
 		task.delay(duration, function()
-			TweenService:Create(Notif, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-				BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0)
-			}):Play()
+			local hideTween = TweenService:Create(Notif, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+				BackgroundTransparency = 1,
+				Size = UDim2.new(1, 0, 0, 0)
+			})
+
 			TweenService:Create(Notif.UIStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
 			TweenService:Create(TitleLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-			TweenService:Create(Divider, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+			TweenService:Create(Divider, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
 			TweenService:Create(ContentLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-			task.delay(0.6, function() Notif:Destroy() end)
+
+			hideTween:Play()
+			hideTween.Completed:Connect(function()
+				Notif:Destroy()
+			end)
 		end)
 	end
 
-	-- ========== ELEMENT FACTORY ==========
+	-- ============================================
+	-- Helper: Creates standard UI elements for a given parent container
+	-- ============================================
 	local function CreateElementMethods(target, parentFrame, updateCanvasFunc)
 
 		function target:Button(config)
@@ -571,7 +573,7 @@ function Library:New(config)
 			local Hit = Create("TextButton", {Text = "", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 10, Parent = BtnBg})
 			Hit.MouseButton1Down:Connect(function()
 				TweenService:Create(BtnBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(28, 32, 50)}):Play()
-				TweenService:Create(RunBadge, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 140, 255)}):Play()
+				TweenService:Create(RunBadge, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 150, 255)}):Play()
 			end)
 			Hit.MouseButton1Up:Connect(function()
 				TweenService:Create(BtnBg, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(22, 22, 30)}):Play()
@@ -611,7 +613,7 @@ function Library:New(config)
 			local Switch = Create("Frame", {
 				Size = UDim2.fromOffset(40, 20),
 				Position = UDim2.new(1, -50, 0.5, -10),
-				BackgroundColor3 = state and Color3.fromRGB(60, 140, 255) or Color3.fromRGB(40, 40, 55),
+				BackgroundColor3 = state and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(40, 40, 55),
 				ZIndex = 6,
 				Parent = TglBg
 			}, {
@@ -625,11 +627,11 @@ function Library:New(config)
 				BackgroundColor3 = Color3.new(1, 1, 1),
 				ZIndex = 7,
 				Parent = Switch
-			}, {Create("UICorner", {CornerRadius = UDim.new(1, 0)})})
+			}, { Create("UICorner", {CornerRadius = UDim.new(1, 0)}) })
 
 			local function updateView(val)
 				TweenService:Create(Switch, TweenInfo.new(0.2), {
-					BackgroundColor3 = val and Color3.fromRGB(60, 140, 255) or Color3.fromRGB(40, 40, 55)
+					BackgroundColor3 = val and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(40, 40, 55)
 				}):Play()
 				TweenService:Create(Knob, TweenInfo.new(0.2), {
 					Position = val and UDim2.fromOffset(22, 2) or UDim2.fromOffset(2, 2)
@@ -637,6 +639,7 @@ function Library:New(config)
 			end
 
 			local Hit = Create("TextButton", {Text = "", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 10, Parent = TglBg})
+
 			Hit.MouseButton1Click:Connect(function()
 				state = not state
 				updateView(state)
@@ -687,7 +690,7 @@ function Library:New(config)
 				Text = tostring(default),
 				Font = Enum.Font.GothamBold,
 				TextSize = 13,
-				TextColor3 = Color3.fromRGB(60, 140, 255),
+				TextColor3 = Color3.fromRGB(80, 150, 255),
 				BackgroundTransparency = 1,
 				Position = UDim2.new(1, -65, 0, 8),
 				Size = UDim2.new(0, 50, 0, 20),
@@ -702,22 +705,14 @@ function Library:New(config)
 				BackgroundColor3 = Color3.fromRGB(40, 40, 55),
 				ZIndex = 6,
 				Parent = SliderBg
-			}, {Create("UICorner", {CornerRadius = UDim.new(1, 0)})})
+			}, { Create("UICorner", {CornerRadius = UDim.new(1, 0)}) })
 
 			local Fill = Create("Frame", {
 				Size = UDim2.fromScale((default - min) / (max - min), 1),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundColor3 = Color3.fromRGB(80, 150, 255),
 				ZIndex = 7,
 				Parent = Tray
-			}, {
-				Create("UICorner", {CornerRadius = UDim.new(1, 0)}),
-				Create("UIGradient", {
-					Color = ColorSequence.new({
-						ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 100, 220)),
-						ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 170, 255))
-					})
-				})
-			})
+			}, { Create("UICorner", {CornerRadius = UDim.new(1, 0)}) })
 
 			local SliderKnob = Create("Frame", {
 				Size = UDim2.fromOffset(8, 8),
@@ -728,7 +723,7 @@ function Library:New(config)
 				Parent = Tray
 			}, {
 				Create("UICorner", {CornerRadius = UDim.new(0, 4)}),
-				Create("UIStroke", {Color = Color3.fromRGB(60, 140, 255), Thickness = 1.5})
+				Create("UIStroke", {Color = Color3.fromRGB(80, 150, 255), Thickness = 1.5})
 			})
 
 			local function Update(input)
@@ -768,7 +763,8 @@ function Library:New(config)
 			local Header = Create("TextButton", {
 				Size = UDim2.new(1, 0, 0, 45),
 				BackgroundTransparency = 1,
-				Text = "", ZIndex = 6,
+				Text = "",
+				ZIndex = 6,
 				Parent = DropdownBg
 			})
 
@@ -807,14 +803,14 @@ function Library:New(config)
 
 			local DropHighlight = Create("Frame", {
 				Size = UDim2.new(1, 0, 0, 30),
-				BackgroundColor3 = Color3.fromRGB(60, 140, 255),
+				BackgroundColor3 = Color3.fromRGB(80, 150, 255),
 				BackgroundTransparency = 0.85,
 				Visible = false,
 				ZIndex = 7,
 				Parent = DDContent
 			}, {
 				Create("UICorner", {CornerRadius = UDim.new(0, 6)}),
-				Create("UIStroke", {Color = Color3.fromRGB(60, 140, 255), Thickness = 1, Transparency = 0.5})
+				Create("UIStroke", {Color = Color3.fromRGB(80, 150, 255), Thickness = 1, Transparency = 0.5})
 			})
 
 			local OptionHolder = Create("Frame", {
@@ -906,7 +902,9 @@ function Library:New(config)
 			})
 
 			local function Resize()
-				local ts = game:GetService("TextService"):GetTextSize(Text.Text, Text.TextSize, Text.Font, Vector2.new(Text.AbsoluteSize.X, 10000))
+				local ts = game:GetService("TextService"):GetTextSize(
+					Text.Text, Text.TextSize, Text.Font, Vector2.new(Text.AbsoluteSize.X, 10000)
+				)
 				LabelBg.Size = UDim2.new(1, 0, 0, ts.Y + 16)
 				Text.Size = UDim2.new(1, -30, 0, ts.Y)
 			end
@@ -932,7 +930,7 @@ function Library:New(config)
 				Text = title:upper(),
 				Font = Enum.Font.GothamBold,
 				TextSize = 12,
-				TextColor3 = Color3.fromRGB(60, 140, 255),
+				TextColor3 = Color3.fromRGB(80, 150, 255),
 				BackgroundTransparency = 1,
 				Position = UDim2.fromOffset(15, 8),
 				Size = UDim2.new(1, -30, 0, 20),
@@ -966,7 +964,9 @@ function Library:New(config)
 			})
 
 			local function Resize()
-				local ts = game:GetService("TextService"):GetTextSize(Desc.Text, Desc.TextSize, Desc.Font, Vector2.new(Desc.AbsoluteSize.X, 10000))
+				local ts = game:GetService("TextService"):GetTextSize(
+					Desc.Text, Desc.TextSize, Desc.Font, Vector2.new(Desc.AbsoluteSize.X, 10000)
+				)
 				SectionBg.Size = UDim2.new(1, 0, 0, ts.Y + 50)
 				Desc.Size = UDim2.new(1, -30, 0, ts.Y)
 			end
@@ -1027,10 +1027,11 @@ function Library:New(config)
 			})
 
 			local Hit = Create("TextButton", {Text = "", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 10, Parent = BindBg})
+
 			Hit.MouseButton1Click:Connect(function()
 				listening = true
 				BindText.Text = "..."
-				TweenService:Create(BindDisplay:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.2), {Color = Color3.fromRGB(60, 140, 255)}):Play()
+				TweenService:Create(BindDisplay:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.2), {Color = Color3.fromRGB(80, 150, 255)}):Play()
 			end)
 
 			UIS.InputBegan:Connect(function(input, gpe)
@@ -1042,7 +1043,7 @@ function Library:New(config)
 					TweenService:Create(BindDisplay:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.2), {Color = Color3.fromRGB(60, 60, 80)}):Play()
 					onChange(input.KeyCode)
 				elseif not listening and input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == default then
-					local t = TweenService:Create(BindDisplay, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(60, 140, 255)})
+					local t = TweenService:Create(BindDisplay, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(80, 150, 255)})
 					t:Play()
 					t.Completed:Connect(function()
 						TweenService:Create(BindDisplay, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 40)}):Play()
@@ -1113,8 +1114,10 @@ function Library:New(config)
 					Size = UDim2.new(0, 180, 0, 26),
 					Position = UDim2.new(1, -195, 0.5, -13)
 				}):Play()
-				TweenService:Create(InputHolder:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.4), {Color = Color3.fromRGB(60, 140, 255)}):Play()
-				if Label then TweenService:Create(Label, TweenInfo.new(0.4), {TextTransparency = 0.5}):Play() end
+				TweenService:Create(InputHolder:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.4), {Color = Color3.fromRGB(80, 150, 255)}):Play()
+				if Label then
+					TweenService:Create(Label, TweenInfo.new(0.4), {TextTransparency = 0.5}):Play()
+				end
 			end)
 
 			Input.FocusLost:Connect(function(enterPressed)
@@ -1123,97 +1126,635 @@ function Library:New(config)
 					Position = UDim2.new(1, -75, 0.5, -13)
 				}):Play()
 				TweenService:Create(InputHolder:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.4), {Color = Color3.fromRGB(50, 50, 70)}):Play()
-				if Label then TweenService:Create(Label, TweenInfo.new(0.4), {TextTransparency = 0}):Play() end
+				if Label then
+					TweenService:Create(Label, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+				end
 				callback(Input.Text, enterPressed)
 			end)
 		end
 	end
 
-	-- ========== SELECT TAB FUNCTION ==========
-	local function SelectTab(tabData)
-		if self.ActiveTab == tabData then return end
-		self.ActiveTab = tabData
+	-- ============================================
+	-- Internal: Select a tab (highlight sidebar + show page)
+	-- ============================================
+	local function SelectTab(tabBtn, tabDot, page)
+		-- Deselect all tabs
+		for _, catFrame in pairs(self.TabHolder:GetChildren()) do
+			if catFrame:IsA("Frame") then
+				-- Category sub-tab buttons
+				local subHolder = catFrame:FindFirstChild("SubTabHolder")
+				if subHolder then
+					for _, subFrame in pairs(subHolder:GetChildren()) do
+						if subFrame:IsA("Frame") then
+							local btn = subFrame:FindFirstChildOfClass("TextButton")
+							local dot = subFrame:FindFirstChild("Dot")
+							if btn then
+								TweenService:Create(btn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(130, 130, 155)}):Play()
+							end
+							if dot then
+								TweenService:Create(dot, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 65)}):Play()
+							end
+							-- Remove highlight bg
+							local hl = subFrame:FindFirstChild("TabHighlightBg")
+							if hl then
+								TweenService:Create(hl, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
+								local hlStroke = hl:FindFirstChildOfClass("UIStroke")
+								if hlStroke then
+									TweenService:Create(hlStroke, TweenInfo.new(0.2), {Transparency = 1}):Play()
+								end
+							end
+						end
+					end
+				end
+			end
+		end
 
 		-- Hide all pages
 		for _, p in pairs(self.Pages:GetChildren()) do
 			if p:IsA("ScrollingFrame") then p.Visible = false end
 		end
 
-		-- Show selected page
-		tabData.Page.Visible = true
+		-- Select this tab
+		if tabBtn then
+			TweenService:Create(tabBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+		end
+		if tabDot then
+			TweenService:Create(tabDot, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 150, 255)}):Play()
+		end
 
-		-- Update all tab button styles
-		for _, td in pairs(self.Tabs) do
-			local isActive = (td == tabData)
-			TweenService:Create(td.Button, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-				TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(130, 130, 155)
-			}):Play()
-			TweenService:Create(td.ButtonBg, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-				BackgroundColor3 = isActive and Color3.fromRGB(30, 35, 50) or Color3.fromRGB(20, 20, 28),
-				BackgroundTransparency = isActive and 0 or 1
-			}):Play()
-			if td.ButtonStroke then
-				TweenService:Create(td.ButtonStroke, TweenInfo.new(0.25), {
-					Color = isActive and Color3.fromRGB(50, 90, 180) or Color3.fromRGB(38, 38, 55),
-					Transparency = isActive and 0.3 or 1
-				}):Play()
+		-- Show highlight bg
+		local subFrame = tabBtn and tabBtn.Parent
+		if subFrame then
+			local hl = subFrame:FindFirstChild("TabHighlightBg")
+			if hl then
+				TweenService:Create(hl, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundTransparency = 0.88}):Play()
+				local hlStroke = hl:FindFirstChildOfClass("UIStroke")
+				if hlStroke then
+					TweenService:Create(hlStroke, TweenInfo.new(0.25), {Transparency = 0.5}):Play()
+				end
 			end
 		end
 
-		-- Animate indicator
-		self.TabIndicator.Visible = true
-		local btnBg = tabData.ButtonBg
-		task.spawn(function()
-			task.wait(0.05)
-			local xPos = btnBg.AbsolutePosition.X - self.TabBar.AbsolutePosition.X
-			local width = btnBg.AbsoluteSize.X
-			TweenService:Create(self.TabIndicator, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-				Position = UDim2.new(0, xPos, 1, -4),
-				Size = UDim2.new(0, width, 0, 3)
-			}):Play()
-		end)
+		page.Visible = true
+		self._activeTabBtn = tabBtn
+		self._activeTabDot = tabDot
 	end
 
-	-- ========== NEW TAB ==========
-	function self:NewTab(name, icon)
-		local Tab = {}
-		local tabData = {}
+	-- ============================================
+	-- NewCategory: Creates a collapsible category in sidebar (Flow-style)
+	-- Usage:
+	--   local cat = Window:NewCategory({Name = "Main", Icon = "rbxassetid://..."})
+	--   local tab = cat:NewTab("Combat")
+	-- ============================================
+	local _categoryOrder = 0
 
-		-- Tab Button in the Flow TabBar
-		local TabBtnBg = Create("Frame", {
-			Size = UDim2.new(0, 0, 0, 28),
-			AutomaticSize = Enum.AutomaticSize.X,
-			BackgroundColor3 = Color3.fromRGB(20, 20, 28),
+	function self:NewCategory(config)
+		local catName = config.Name or "Category"
+		local catIcon = config.Icon or DEFAULT_CATEGORY_ICONS[catName] or DEFAULT_SECTION_ICON
+		local defaultOpen = config.Default
+		if defaultOpen == nil then defaultOpen = true end
+
+		_categoryOrder = _categoryOrder + 1
+		local catExpanded = defaultOpen
+
+		local Category = {}
+
+		-- Category container (holds header + sub tabs)
+		local CatContainer = Create("Frame", {
+			Name = "Cat_" .. catName,
+			Size = UDim2.new(1, 0, 0, 30), -- Will auto-resize
 			BackgroundTransparency = 1,
+			ClipsDescendants = true,
+			LayoutOrder = _categoryOrder,
+			ZIndex = 5,
+			Parent = self.TabHolder
+		})
+
+		-- Category header button
+		local CatHeader = Create("TextButton", {
+			Name = "CatHeader",
+			Size = UDim2.new(1, 0, 0, 30),
+			BackgroundTransparency = 1,
+			Text = "",
 			ZIndex = 7,
-			Parent = self.TabScrollFrame
+			Parent = CatContainer
+		})
+
+		-- Category icon
+		local CatIcon = Create("ImageLabel", {
+			Image = catIcon,
+			Size = UDim2.fromOffset(14, 14),
+			Position = UDim2.fromOffset(4, 8),
+			BackgroundTransparency = 1,
+			ImageColor3 = Color3.fromRGB(180, 180, 200),
+			ScaleType = Enum.ScaleType.Fit,
+			ZIndex = 8,
+			Parent = CatHeader
+		})
+
+		-- Category title
+		local CatTitle = Create("TextLabel", {
+			Text = catName,
+			Font = Enum.Font.GothamBold,
+			TextSize = 13,
+			TextColor3 = Color3.fromRGB(220, 220, 235),
+			BackgroundTransparency = 1,
+			Position = UDim2.fromOffset(24, 0),
+			Size = UDim2.new(1, -50, 1, 0),
+			TextXAlignment = "Left",
+			ZIndex = 8,
+			Parent = CatHeader
+		})
+
+		-- Arrow (↓ / →)
+		local CatArrow = Create("TextLabel", {
+			Text = catExpanded and "↓" or "↓",
+			Font = Enum.Font.GothamBold,
+			TextSize = 11,
+			TextColor3 = Color3.fromRGB(100, 100, 130),
+			BackgroundTransparency = 1,
+			Position = UDim2.new(1, -20, 0, 0),
+			Size = UDim2.new(0, 16, 1, 0),
+			ZIndex = 8,
+			Rotation = catExpanded and 0 or -90,
+			Parent = CatHeader
+		})
+
+		-- Sub tab holder (tabs go here)
+		local SubTabHolder = Create("Frame", {
+			Name = "SubTabHolder",
+			Size = UDim2.new(1, 0, 0, 0), -- Auto-sized
+			Position = UDim2.fromOffset(0, 32),
+			BackgroundTransparency = 1,
+			ZIndex = 5,
+			Parent = CatContainer
+		}, {
+			Create("UIListLayout", {Padding = UDim.new(0, 3), SortOrder = Enum.SortOrder.LayoutOrder}),
+			Create("UIPadding", {PaddingLeft = UDim.new(0, 6)})
+		})
+
+		local subLayout = SubTabHolder:FindFirstChildOfClass("UIListLayout")
+		local subTabOrder = 0
+
+		-- Update category container size
+		local function UpdateCatSize()
+			local contentHeight = subLayout.AbsoluteContentSize.Y
+			local targetHeight
+			if catExpanded then
+				targetHeight = 32 + contentHeight + 4
+			else
+				targetHeight = 30
+			end
+
+			TweenService:Create(CatContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Size = UDim2.new(1, 0, 0, targetHeight)
+			}):Play()
+		end
+
+		subLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+			if catExpanded then
+				UpdateCatSize()
+			end
+		end)
+
+		-- Toggle category expand/collapse
+		CatHeader.MouseButton1Click:Connect(function()
+			catExpanded = not catExpanded
+
+			TweenService:Create(CatArrow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+				Rotation = catExpanded and 0 or -90
+			}):Play()
+
+			TweenService:Create(CatTitle, TweenInfo.new(0.2), {
+				TextColor3 = catExpanded and Color3.fromRGB(220, 220, 235) or Color3.fromRGB(140, 140, 160)
+			}):Play()
+
+			TweenService:Create(CatIcon, TweenInfo.new(0.2), {
+				ImageColor3 = catExpanded and Color3.fromRGB(180, 180, 200) or Color3.fromRGB(100, 100, 130)
+			}):Play()
+
+			UpdateCatSize()
+		end)
+
+		-- Hover effect on header
+		CatHeader.MouseEnter:Connect(function()
+			TweenService:Create(CatTitle, TweenInfo.new(0.15), {
+				TextColor3 = Color3.fromRGB(255, 255, 255)
+			}):Play()
+		end)
+		CatHeader.MouseLeave:Connect(function()
+			TweenService:Create(CatTitle, TweenInfo.new(0.15), {
+				TextColor3 = catExpanded and Color3.fromRGB(220, 220, 235) or Color3.fromRGB(140, 140, 160)
+			}):Play()
+		end)
+
+		-- ============================================
+		-- Category:NewTab - Creates a sub-tab under this category
+		-- ============================================
+		function Category:NewTab(name)
+			local Tab = {}
+			subTabOrder = subTabOrder + 1
+
+			-- Sub tab frame in sidebar
+			local SubTabFrame = Create("Frame", {
+				Name = "SubTab_" .. name,
+				Size = UDim2.new(1, -6, 0, 28),
+				BackgroundTransparency = 1,
+				LayoutOrder = subTabOrder,
+				ZIndex = 6,
+				Parent = SubTabHolder
+			})
+
+			-- Highlight background (shown when active)
+			local TabHighlightBg = Create("Frame", {
+				Name = "TabHighlightBg",
+				Size = UDim2.fromScale(1, 1),
+				BackgroundColor3 = Color3.fromRGB(80, 150, 255),
+				BackgroundTransparency = 1,
+				ZIndex = 6,
+				Parent = SubTabFrame
+			}, {
+				Create("UICorner", {CornerRadius = UDim.new(0, 7)}),
+				Create("UIStroke", {Color = Color3.fromRGB(80, 150, 255), Thickness = 1, Transparency = 1})
+			})
+
+			-- Small dot indicator
+			local Dot = Create("Frame", {
+				Name = "Dot",
+				Size = UDim2.fromOffset(5, 5),
+				Position = UDim2.fromOffset(8, 11),
+				BackgroundColor3 = Color3.fromRGB(50, 50, 65),
+				ZIndex = 8,
+				Parent = SubTabFrame
+			}, { Create("UICorner", {CornerRadius = UDim.new(1, 0)}) })
+
+			-- Tab button text
+			local TabBtn = Create("TextButton", {
+				Text = name,
+				Font = Enum.Font.GothamMedium,
+				TextSize = 12,
+				TextColor3 = Color3.fromRGB(130, 130, 155),
+				BackgroundTransparency = 1,
+				Position = UDim2.fromOffset(20, 0),
+				Size = UDim2.new(1, -20, 1, 0),
+				TextXAlignment = "Left",
+				ZIndex = 9,
+				Parent = SubTabFrame
+			})
+
+			-- Content page (scrollable)
+			local Page = Create("ScrollingFrame", {
+				Size = UDim2.fromScale(1, 1),
+				BackgroundTransparency = 1,
+				Visible = false,
+				ScrollBarThickness = 2,
+				ScrollBarImageColor3 = Color3.fromRGB(80, 150, 255),
+				CanvasSize = UDim2.new(0, 0, 0, 0),
+				ZIndex = 4,
+				Parent = self.Pages
+			}, {
+				Create("UIListLayout", {
+					Padding = UDim.new(0, 8),
+					SortOrder = Enum.SortOrder.LayoutOrder
+				}),
+				Create("UIPadding", {
+					PaddingTop = UDim.new(0, 2),
+					PaddingLeft = UDim.new(0, 2),
+					PaddingRight = UDim.new(0, 8)
+				})
+			})
+
+			local UIListLayout = Page:FindFirstChildOfClass("UIListLayout")
+
+			local function UpdateCanvasSize()
+				Page.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 15)
+			end
+			UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdateCanvasSize)
+			task.spawn(UpdateCanvasSize)
+
+			-- Click to select tab
+			TabBtn.MouseButton1Click:Connect(function()
+				SelectTab(TabBtn, Dot, Page)
+			end)
+
+			-- Hover effects
+			TabBtn.MouseEnter:Connect(function()
+				if self._activeTabBtn ~= TabBtn then
+					TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(200, 200, 220)}):Play()
+					TweenService:Create(Dot, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(100, 100, 130)}):Play()
+				end
+			end)
+			TabBtn.MouseLeave:Connect(function()
+				if self._activeTabBtn ~= TabBtn then
+					TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(130, 130, 155)}):Play()
+					TweenService:Create(Dot, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(50, 50, 65)}):Play()
+				end
+			end)
+
+			-- Add all standard element methods to Tab
+			CreateElementMethods(Tab, Page, UpdateCanvasSize)
+
+			-- ============================================
+			-- Section: Collapsible group of elements (same as before)
+			-- ============================================
+			function Tab:Section(config)
+				local sectionName = config.Name or config.Title or "Section"
+				local sectionDesc = config.Description or config.Desc or nil
+				local icon = config.Icon or DEFAULT_SECTION_ICON
+				local defaultOpen = config.Default
+				if defaultOpen == nil then defaultOpen = true end
+				local sExpanded = defaultOpen
+
+				local Section = {}
+
+				local SectionContainer = Create("Frame", {
+					Name = "Section_" .. sectionName,
+					Size = UDim2.new(1, 0, 0, 40),
+					BackgroundColor3 = Color3.fromRGB(18, 18, 25),
+					ClipsDescendants = true,
+					ZIndex = 5,
+					Parent = Page
+				}, {
+					Create("UICorner", {CornerRadius = UDim.new(0, 10)}),
+					Create("UIStroke", {Color = Color3.fromRGB(45, 45, 60), Thickness = 1})
+				})
+
+				local HeaderBtn = Create("TextButton", {
+					Name = "SectionHeader",
+					Size = UDim2.new(1, 0, 0, 40),
+					BackgroundTransparency = 1,
+					Text = "",
+					ZIndex = 7,
+					Parent = SectionContainer
+				})
+
+				local AccentBar = Create("Frame", {
+					Size = UDim2.new(0, 3, 0, 20),
+					Position = UDim2.fromOffset(0, 10),
+					BackgroundColor3 = Color3.fromRGB(80, 150, 255),
+					BorderSizePixel = 0,
+					ZIndex = 8,
+					Parent = HeaderBtn
+				}, {
+					Create("UICorner", {CornerRadius = UDim.new(0, 2)})
+				})
+
+				local IconLabel = Create("ImageLabel", {
+					Image = icon,
+					Size = UDim2.fromOffset(16, 16),
+					Position = UDim2.new(0, 14, 0.5, -8),
+					BackgroundTransparency = 1,
+					ImageColor3 = Color3.fromRGB(80, 150, 255),
+					ScaleType = Enum.ScaleType.Fit,
+					ZIndex = 8,
+					Parent = HeaderBtn
+				})
+
+				local SectionTitle = Create("TextLabel", {
+					Text = sectionName,
+					Font = Enum.Font.GothamBold,
+					TextSize = 14,
+					TextColor3 = Color3.fromRGB(230, 230, 245),
+					BackgroundTransparency = 1,
+					Position = UDim2.fromOffset(38, 0),
+					Size = UDim2.new(1, -80, 1, 0),
+					TextXAlignment = "Left",
+					ZIndex = 8,
+					Parent = HeaderBtn
+				})
+
+				local SectionArrow = Create("TextLabel", {
+					Text = sExpanded and "▾" or "▸",
+					Font = Enum.Font.GothamBold,
+					TextSize = 14,
+					TextColor3 = Color3.fromRGB(100, 100, 130),
+					BackgroundTransparency = 1,
+					Position = UDim2.new(1, -30, 0, 0),
+					Size = UDim2.new(0, 20, 1, 0),
+					ZIndex = 8,
+					Parent = HeaderBtn
+				})
+
+				local descHeight = 0
+				if sectionDesc then
+					Create("TextLabel", {
+						Text = sectionDesc,
+						Font = Enum.Font.GothamMedium,
+						TextSize = 11,
+						TextColor3 = Color3.fromRGB(100, 100, 130),
+						BackgroundTransparency = 1,
+						Position = UDim2.fromOffset(38, 25),
+						Size = UDim2.new(1, -80, 0, 15),
+						TextXAlignment = "Left",
+						ZIndex = 8,
+						Parent = HeaderBtn
+					})
+					descHeight = 8
+					HeaderBtn.Size = UDim2.new(1, 0, 0, 48)
+				end
+
+				local headerHeight = sectionDesc and 48 or 40
+
+				local HeaderDivider = Create("Frame", {
+					Size = UDim2.new(1, -16, 0, 1),
+					Position = UDim2.fromOffset(8, headerHeight),
+					BackgroundColor3 = Color3.fromRGB(40, 40, 55),
+					BackgroundTransparency = sExpanded and 0 or 1,
+					BorderSizePixel = 0,
+					ZIndex = 7,
+					Parent = SectionContainer
+				})
+
+				local ContentHolder = Create("Frame", {
+					Name = "SectionContent",
+					Size = UDim2.new(1, -16, 0, 0),
+					Position = UDim2.fromOffset(8, headerHeight + 4),
+					BackgroundTransparency = 1,
+					ZIndex = 6,
+					Parent = SectionContainer
+				}, {
+					Create("UIListLayout", {
+						Padding = UDim.new(0, 6),
+						SortOrder = Enum.SortOrder.LayoutOrder
+					}),
+					Create("UIPadding", {
+						PaddingTop = UDim.new(0, 4),
+						PaddingBottom = UDim.new(0, 4),
+						PaddingLeft = UDim.new(0, 2),
+						PaddingRight = UDim.new(0, 2)
+					})
+				})
+
+				local ContentLayout = ContentHolder:FindFirstChildOfClass("UIListLayout")
+
+				local function UpdateSectionSize()
+					local contentHeight = ContentLayout.AbsoluteContentSize.Y + 12
+					local targetHeight = sExpanded and (headerHeight + 4 + contentHeight) or headerHeight
+
+					TweenService:Create(SectionContainer, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+						Size = UDim2.new(1, 0, 0, targetHeight)
+					}):Play()
+
+					TweenService:Create(HeaderDivider, TweenInfo.new(0.2), {
+						BackgroundTransparency = sExpanded and 0 or 1
+					}):Play()
+
+					task.delay(0.4, UpdateCanvasSize)
+				end
+
+				ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+					if sExpanded then
+						UpdateSectionSize()
+					end
+				end)
+
+				HeaderBtn.MouseButton1Click:Connect(function()
+					sExpanded = not sExpanded
+					SectionArrow.Text = sExpanded and "▾" or "▸"
+
+					TweenService:Create(AccentBar, TweenInfo.new(0.2), {
+						BackgroundColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(60, 60, 80)
+					}):Play()
+
+					TweenService:Create(IconLabel, TweenInfo.new(0.2), {
+						ImageColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(100, 100, 130)
+					}):Play()
+
+					TweenService:Create(SectionTitle, TweenInfo.new(0.2), {
+						TextColor3 = sExpanded and Color3.fromRGB(230, 230, 245) or Color3.fromRGB(160, 160, 180)
+					}):Play()
+
+					TweenService:Create(SectionArrow, TweenInfo.new(0.2), {
+						TextColor3 = sExpanded and Color3.fromRGB(100, 100, 130) or Color3.fromRGB(70, 70, 90)
+					}):Play()
+
+					UpdateSectionSize()
+				end)
+
+				HeaderBtn.MouseEnter:Connect(function()
+					TweenService:Create(SectionContainer, TweenInfo.new(0.15), {
+						BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+					}):Play()
+				end)
+
+				HeaderBtn.MouseLeave:Connect(function()
+					TweenService:Create(SectionContainer, TweenInfo.new(0.15), {
+						BackgroundColor3 = Color3.fromRGB(18, 18, 25)
+					}):Play()
+				end)
+
+				CreateElementMethods(Section, ContentHolder, UpdateCanvasSize)
+
+				if sExpanded then
+					task.spawn(function()
+						task.wait(0.1)
+						UpdateSectionSize()
+					end)
+				else
+					SectionContainer.Size = UDim2.new(1, 0, 0, headerHeight)
+					AccentBar.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+					IconLabel.ImageColor3 = Color3.fromRGB(100, 100, 130)
+					SectionTitle.TextColor3 = Color3.fromRGB(160, 160, 180)
+					SectionArrow.TextColor3 = Color3.fromRGB(70, 70, 90)
+				end
+
+				function Section:SetExpanded(val)
+					sExpanded = val
+					SectionArrow.Text = sExpanded and "▾" or "▸"
+					UpdateSectionSize()
+				end
+
+				function Section:IsExpanded()
+					return sExpanded
+				end
+
+				return Section
+			end
+
+			-- Update category size after adding tab
+			task.spawn(function()
+				task.wait(0.05)
+				UpdateCatSize()
+			end)
+
+			return Tab
+		end
+
+		-- Initial size
+		if catExpanded then
+			task.spawn(function()
+				task.wait(0.1)
+				UpdateCatSize()
+			end)
+		else
+			CatContainer.Size = UDim2.new(1, 0, 0, 30)
+			CatArrow.Rotation = -90
+			CatTitle.TextColor3 = Color3.fromRGB(140, 140, 160)
+			CatIcon.ImageColor3 = Color3.fromRGB(100, 100, 130)
+		end
+
+		-- Category API
+		function Category:SetExpanded(val)
+			catExpanded = val
+			TweenService:Create(CatArrow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
+				Rotation = catExpanded and 0 or -90
+			}):Play()
+			UpdateCatSize()
+		end
+
+		function Category:IsExpanded()
+			return catExpanded
+		end
+
+		return Category
+	end
+
+	-- ============================================
+	-- NewTab (BACKWARD COMPATIBLE - creates a tab without category)
+	-- Works exactly like before for users who don't want categories
+	-- ============================================
+	function self:NewTab(name)
+		local Tab = {}
+
+		_categoryOrder = _categoryOrder + 1
+
+		local TabBg = Create("Frame", {
+			Size = UDim2.new(1, 0, 0, 34),
+			BackgroundColor3 = Color3.fromRGB(25, 25, 35),
+			LayoutOrder = _categoryOrder,
+			ZIndex = 6,
+			Parent = self.TabHolder
 		}, {
 			Create("UICorner", {CornerRadius = UDim.new(0, 8)}),
-			Create("UIStroke", {Color = Color3.fromRGB(38, 38, 55), Thickness = 1, Transparency = 1}),
-			Create("UIPadding", {PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12)})
+			Create("UIStroke", {Color = Color3.fromRGB(45, 45, 60), Thickness = 1})
 		})
+
+		local Dot = Create("Frame", {
+			Name = "Dot",
+			Size = UDim2.fromOffset(4, 4),
+			Position = UDim2.new(0, 10, 0.5, -2),
+			BackgroundColor3 = Color3.fromRGB(150, 150, 170),
+			ZIndex = 7,
+			Parent = TabBg
+		}, { Create("UICorner", {CornerRadius = UDim.new(1, 0)}) })
 
 		local TabBtn = Create("TextButton", {
 			Text = name,
 			Font = Enum.Font.GothamMedium,
 			TextSize = 13,
-			TextColor3 = Color3.fromRGB(130, 130, 155),
+			TextColor3 = Color3.fromRGB(150, 150, 170),
 			BackgroundTransparency = 1,
-			Size = UDim2.new(0, 0, 1, 0),
-			AutomaticSize = Enum.AutomaticSize.X,
+			Size = UDim2.fromScale(1, 1),
 			ZIndex = 8,
-			Parent = TabBtnBg
+			Parent = TabBg
 		})
 
-		local TabBtnStroke = TabBtnBg:FindFirstChildOfClass("UIStroke")
-
-		-- Page
 		local Page = Create("ScrollingFrame", {
 			Size = UDim2.fromScale(1, 1),
 			BackgroundTransparency = 1,
 			Visible = false,
 			ScrollBarThickness = 2,
-			ScrollBarImageColor3 = Color3.fromRGB(60, 140, 255),
+			ScrollBarImageColor3 = Color3.fromRGB(80, 150, 255),
 			CanvasSize = UDim2.new(0, 0, 0, 0),
 			ZIndex = 4,
 			Parent = self.Pages
@@ -1230,54 +1771,43 @@ function Library:New(config)
 		})
 
 		local UIListLayout = Page:FindFirstChildOfClass("UIListLayout")
+
 		local function UpdateCanvasSize()
 			Page.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 15)
 		end
 		UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdateCanvasSize)
 		task.spawn(UpdateCanvasSize)
 
-		tabData.Button = TabBtn
-		tabData.ButtonBg = TabBtnBg
-		tabData.ButtonStroke = TabBtnStroke
-		tabData.Page = Page
-		table.insert(self.Tabs, tabData)
-
-		-- Hover effects
-		TabBtn.MouseEnter:Connect(function()
-			if self.ActiveTab ~= tabData then
-				TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(180, 180, 210)}):Play()
-			end
-		end)
-		TabBtn.MouseLeave:Connect(function()
-			if self.ActiveTab ~= tabData then
-				TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(130, 130, 155)}):Play()
-			end
-		end)
-
-		-- Click to select
 		TabBtn.MouseButton1Click:Connect(function()
-			SelectTab(tabData)
+			-- Deselect all
+			for _, p in pairs(self.Pages:GetChildren()) do if p:IsA("ScrollingFrame") then p.Visible = false end end
+			for _, bg in pairs(self.TabHolder:GetChildren()) do
+				if bg:IsA("Frame") and bg:FindFirstChild("Frame") then
+					local btn = bg:FindFirstChildOfClass("TextButton")
+					local dot = bg:FindFirstChild("Frame")
+					if btn then
+						TweenService:Create(btn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150, 150, 170)}):Play()
+					end
+					if dot then
+						TweenService:Create(dot, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(150, 150, 170)}):Play()
+					end
+				end
+			end
+			Page.Visible = true
+			TweenService:Create(TabBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+			TweenService:Create(Dot, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 150, 255)}):Play()
 		end)
 
-		-- Auto-select first tab
-		if #self.Tabs == 1 then
-			task.spawn(function()
-				task.wait(0.1)
-				SelectTab(tabData)
-			end)
-		end
-
-		-- Add element methods
 		CreateElementMethods(Tab, Page, UpdateCanvasSize)
 
-		-- ========== SECTION (Collapsible) ==========
+		-- Section support (same as category tabs)
 		function Tab:Section(config)
 			local sectionName = config.Name or config.Title or "Section"
 			local sectionDesc = config.Description or config.Desc or nil
-			local sIcon = config.Icon or DEFAULT_SECTION_ICON
+			local icon = config.Icon or DEFAULT_SECTION_ICON
 			local defaultOpen = config.Default
 			if defaultOpen == nil then defaultOpen = true end
-			local expanded = defaultOpen
+			local sExpanded = defaultOpen
 
 			local Section = {}
 
@@ -1294,38 +1824,28 @@ function Library:New(config)
 			})
 
 			local HeaderBtn = Create("TextButton", {
-				Name = "SectionHeader",
 				Size = UDim2.new(1, 0, 0, 40),
 				BackgroundTransparency = 1,
-				Text = "", ZIndex = 7,
+				Text = "",
+				ZIndex = 7,
 				Parent = SectionContainer
 			})
 
-			-- Left accent bar with gradient
 			local AccentBar = Create("Frame", {
 				Size = UDim2.new(0, 3, 0, 20),
 				Position = UDim2.fromOffset(0, 10),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundColor3 = Color3.fromRGB(80, 150, 255),
 				BorderSizePixel = 0,
 				ZIndex = 8,
 				Parent = HeaderBtn
-			}, {
-				Create("UICorner", {CornerRadius = UDim.new(0, 2)}),
-				Create("UIGradient", {
-					Color = ColorSequence.new({
-						ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 100, 220)),
-						ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 180, 255))
-					}),
-					Rotation = 90
-				})
-			})
+			}, { Create("UICorner", {CornerRadius = UDim.new(0, 2)}) })
 
 			local IconLabel = Create("ImageLabel", {
-				Image = sIcon,
+				Image = icon,
 				Size = UDim2.fromOffset(16, 16),
 				Position = UDim2.new(0, 14, 0.5, -8),
 				BackgroundTransparency = 1,
-				ImageColor3 = Color3.fromRGB(60, 140, 255),
+				ImageColor3 = Color3.fromRGB(80, 150, 255),
 				ScaleType = Enum.ScaleType.Fit,
 				ZIndex = 8,
 				Parent = HeaderBtn
@@ -1345,7 +1865,7 @@ function Library:New(config)
 			})
 
 			local SectionArrow = Create("TextLabel", {
-				Text = expanded and "▾" or "▸",
+				Text = sExpanded and "▾" or "▸",
 				Font = Enum.Font.GothamBold,
 				TextSize = 14,
 				TextColor3 = Color3.fromRGB(100, 100, 130),
@@ -1356,7 +1876,6 @@ function Library:New(config)
 				Parent = HeaderBtn
 			})
 
-			local descHeight = 0
 			if sectionDesc then
 				Create("TextLabel", {
 					Text = sectionDesc,
@@ -1370,7 +1889,6 @@ function Library:New(config)
 					ZIndex = 8,
 					Parent = HeaderBtn
 				})
-				descHeight = 8
 				HeaderBtn.Size = UDim2.new(1, 0, 0, 48)
 			end
 
@@ -1380,65 +1898,45 @@ function Library:New(config)
 				Size = UDim2.new(1, -16, 0, 1),
 				Position = UDim2.fromOffset(8, headerHeight),
 				BackgroundColor3 = Color3.fromRGB(40, 40, 55),
-				BackgroundTransparency = expanded and 0 or 1,
+				BackgroundTransparency = sExpanded and 0 or 1,
 				BorderSizePixel = 0,
 				ZIndex = 7,
 				Parent = SectionContainer
 			})
 
 			local ContentHolder = Create("Frame", {
-				Name = "SectionContent",
 				Size = UDim2.new(1, -16, 0, 0),
 				Position = UDim2.fromOffset(8, headerHeight + 4),
 				BackgroundTransparency = 1,
 				ZIndex = 6,
 				Parent = SectionContainer
 			}, {
-				Create("UIListLayout", {
-					Padding = UDim.new(0, 6),
-					SortOrder = Enum.SortOrder.LayoutOrder
-				}),
-				Create("UIPadding", {
-					PaddingTop = UDim.new(0, 4),
-					PaddingBottom = UDim.new(0, 4),
-					PaddingLeft = UDim.new(0, 2),
-					PaddingRight = UDim.new(0, 2)
-				})
+				Create("UIListLayout", {Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder}),
+				Create("UIPadding", {PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4), PaddingLeft = UDim.new(0, 2), PaddingRight = UDim.new(0, 2)})
 			})
 
 			local ContentLayout = ContentHolder:FindFirstChildOfClass("UIListLayout")
 
 			local function UpdateSectionSize()
 				local contentHeight = ContentLayout.AbsoluteContentSize.Y + 12
-				local targetHeight = expanded and (headerHeight + 4 + contentHeight) or headerHeight
+				local targetHeight = sExpanded and (headerHeight + 4 + contentHeight) or headerHeight
 				TweenService:Create(SectionContainer, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
 					Size = UDim2.new(1, 0, 0, targetHeight)
 				}):Play()
-				TweenService:Create(HeaderDivider, TweenInfo.new(0.2), {
-					BackgroundTransparency = expanded and 0 or 1
-				}):Play()
+				TweenService:Create(HeaderDivider, TweenInfo.new(0.2), {BackgroundTransparency = sExpanded and 0 or 1}):Play()
 				task.delay(0.4, UpdateCanvasSize)
 			end
 
 			ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-				if expanded then UpdateSectionSize() end
+				if sExpanded then UpdateSectionSize() end
 			end)
 
 			HeaderBtn.MouseButton1Click:Connect(function()
-				expanded = not expanded
-				SectionArrow.Text = expanded and "▾" or "▸"
-				TweenService:Create(AccentBar, TweenInfo.new(0.2), {
-					BackgroundTransparency = expanded and 0 or 0.5
-				}):Play()
-				TweenService:Create(IconLabel, TweenInfo.new(0.2), {
-					ImageColor3 = expanded and Color3.fromRGB(60, 140, 255) or Color3.fromRGB(100, 100, 130)
-				}):Play()
-				TweenService:Create(SectionTitle, TweenInfo.new(0.2), {
-					TextColor3 = expanded and Color3.fromRGB(230, 230, 245) or Color3.fromRGB(160, 160, 180)
-				}):Play()
-				TweenService:Create(SectionArrow, TweenInfo.new(0.2), {
-					TextColor3 = expanded and Color3.fromRGB(100, 100, 130) or Color3.fromRGB(70, 70, 90)
-				}):Play()
+				sExpanded = not sExpanded
+				SectionArrow.Text = sExpanded and "▾" or "▸"
+				TweenService:Create(AccentBar, TweenInfo.new(0.2), {BackgroundColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(60, 60, 80)}):Play()
+				TweenService:Create(IconLabel, TweenInfo.new(0.2), {ImageColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(100, 100, 130)}):Play()
+				TweenService:Create(SectionTitle, TweenInfo.new(0.2), {TextColor3 = sExpanded and Color3.fromRGB(230, 230, 245) or Color3.fromRGB(160, 160, 180)}):Play()
 				UpdateSectionSize()
 			end)
 
@@ -1451,27 +1949,17 @@ function Library:New(config)
 
 			CreateElementMethods(Section, ContentHolder, UpdateCanvasSize)
 
-			if expanded then
-				task.spawn(function()
-					task.wait(0.1)
-					UpdateSectionSize()
-				end)
+			if sExpanded then
+				task.spawn(function() task.wait(0.1); UpdateSectionSize() end)
 			else
 				SectionContainer.Size = UDim2.new(1, 0, 0, headerHeight)
-				AccentBar.BackgroundTransparency = 0.5
+				AccentBar.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
 				IconLabel.ImageColor3 = Color3.fromRGB(100, 100, 130)
 				SectionTitle.TextColor3 = Color3.fromRGB(160, 160, 180)
-				SectionArrow.TextColor3 = Color3.fromRGB(70, 70, 90)
 			end
 
-			function Section:SetExpanded(val)
-				expanded = val
-				SectionArrow.Text = expanded and "▾" or "▸"
-				UpdateSectionSize()
-			end
-			function Section:IsExpanded()
-				return expanded
-			end
+			function Section:SetExpanded(val) sExpanded = val; SectionArrow.Text = sExpanded and "▾" or "▸"; UpdateSectionSize() end
+			function Section:IsExpanded() return sExpanded end
 
 			return Section
 		end

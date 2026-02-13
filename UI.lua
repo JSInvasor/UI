@@ -1223,7 +1223,7 @@ function Library:New(config)
 		-- Category container (holds header + sub tabs)
 		local CatContainer = Create("Frame", {
 			Name = "Cat_" .. catName,
-			Size = UDim2.new(1, 0, 0, 30), -- Will auto-resize
+			Size = UDim2.new(1, 0, 0, 32), -- Will auto-resize
 			BackgroundTransparency = 1,
 			ClipsDescendants = true,
 			LayoutOrder = _categoryOrder,
@@ -1234,18 +1234,21 @@ function Library:New(config)
 		-- Category header button
 		local CatHeader = Create("TextButton", {
 			Name = "CatHeader",
-			Size = UDim2.new(1, 0, 0, 30),
-			BackgroundTransparency = 1,
+			Size = UDim2.new(1, 0, 0, 32),
+			BackgroundColor3 = Color3.fromRGB(25, 25, 35),
+			BackgroundTransparency = 0.5,
 			Text = "",
 			ZIndex = 7,
 			Parent = CatContainer
+		}, {
+			Create("UICorner", {CornerRadius = UDim.new(0, 6)})
 		})
 
-		-- Category icon
+		-- Category icon (left side)
 		local CatIcon = Create("ImageLabel", {
 			Image = catIcon,
 			Size = UDim2.fromOffset(14, 14),
-			Position = UDim2.fromOffset(4, 8),
+			Position = UDim2.fromOffset(8, 9),
 			BackgroundTransparency = 1,
 			ImageColor3 = Color3.fromRGB(180, 180, 200),
 			ScaleType = Enum.ScaleType.Fit,
@@ -1253,31 +1256,33 @@ function Library:New(config)
 			Parent = CatHeader
 		})
 
-		-- Category title
+		-- Category title (centered)
 		local CatTitle = Create("TextLabel", {
 			Text = catName,
 			Font = Enum.Font.GothamBold,
-			TextSize = 13,
+			TextSize = 12,
 			TextColor3 = Color3.fromRGB(220, 220, 235),
 			BackgroundTransparency = 1,
-			Position = UDim2.fromOffset(24, 0),
-			Size = UDim2.new(1, -50, 1, 0),
-			TextXAlignment = "Left",
+			Position = UDim2.fromOffset(26, 0),
+			Size = UDim2.new(1, -52, 1, 0),
+			TextXAlignment = "Center",
 			ZIndex = 8,
 			Parent = CatHeader
 		})
 
-		-- Arrow (↓ / →)
-		local CatArrow = Create("TextLabel", {
-			Text = catExpanded and "↓" or "↓",
-			Font = Enum.Font.GothamBold,
-			TextSize = 11,
-			TextColor3 = Color3.fromRGB(100, 100, 130),
+		-- Arrow Icon (Lucide: arrow-up-down when collapsed, arrow-left-right when expanded)
+		local ICON_COLLAPSED = "rbxassetid://10709768538"  -- lucide arrow-up-down
+		local ICON_EXPANDED = "rbxassetid://10709768019"   -- lucide arrow-left-right
+
+		local CatArrowIcon = Create("ImageLabel", {
+			Name = "CatArrowIcon",
+			Image = catExpanded and ICON_EXPANDED or ICON_COLLAPSED,
+			Size = UDim2.fromOffset(12, 12),
+			Position = UDim2.new(1, -20, 0.5, -6),
 			BackgroundTransparency = 1,
-			Position = UDim2.new(1, -20, 0, 0),
-			Size = UDim2.new(0, 16, 1, 0),
+			ImageColor3 = Color3.fromRGB(100, 100, 130),
+			ScaleType = Enum.ScaleType.Fit,
 			ZIndex = 8,
-			Rotation = catExpanded and 0 or -90,
 			Parent = CatHeader
 		})
 
@@ -1304,7 +1309,7 @@ function Library:New(config)
 			if catExpanded then
 				targetHeight = 32 + contentHeight + 4
 			else
-				targetHeight = 30
+				targetHeight = 32
 			end
 
 			TweenService:Create(CatContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
@@ -1322,8 +1327,11 @@ function Library:New(config)
 		CatHeader.MouseButton1Click:Connect(function()
 			catExpanded = not catExpanded
 
-			TweenService:Create(CatArrow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-				Rotation = catExpanded and 0 or -90
+			-- Swap Lucide icon
+			CatArrowIcon.Image = catExpanded and ICON_EXPANDED or ICON_COLLAPSED
+
+			TweenService:Create(CatArrowIcon, TweenInfo.new(0.2), {
+				ImageColor3 = catExpanded and Color3.fromRGB(140, 140, 170) or Color3.fromRGB(80, 80, 110)
 			}):Play()
 
 			TweenService:Create(CatTitle, TweenInfo.new(0.2), {
@@ -1342,10 +1350,16 @@ function Library:New(config)
 			TweenService:Create(CatTitle, TweenInfo.new(0.15), {
 				TextColor3 = Color3.fromRGB(255, 255, 255)
 			}):Play()
+			TweenService:Create(CatHeader, TweenInfo.new(0.15), {
+				BackgroundTransparency = 0.3
+			}):Play()
 		end)
 		CatHeader.MouseLeave:Connect(function()
 			TweenService:Create(CatTitle, TweenInfo.new(0.15), {
 				TextColor3 = catExpanded and Color3.fromRGB(220, 220, 235) or Color3.fromRGB(140, 140, 160)
+			}):Play()
+			TweenService:Create(CatHeader, TweenInfo.new(0.15), {
+				BackgroundTransparency = 0.5
 			}):Play()
 		end)
 
@@ -1688,8 +1702,9 @@ function Library:New(config)
 				UpdateCatSize()
 			end)
 		else
-			CatContainer.Size = UDim2.new(1, 0, 0, 30)
-			CatArrow.Rotation = -90
+			CatContainer.Size = UDim2.new(1, 0, 0, 32)
+			CatArrowIcon.Image = ICON_COLLAPSED
+			CatArrowIcon.ImageColor3 = Color3.fromRGB(80, 80, 110)
 			CatTitle.TextColor3 = Color3.fromRGB(140, 140, 160)
 			CatIcon.ImageColor3 = Color3.fromRGB(100, 100, 130)
 		end
@@ -1697,8 +1712,9 @@ function Library:New(config)
 		-- Category API
 		function Category:SetExpanded(val)
 			catExpanded = val
-			TweenService:Create(CatArrow, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-				Rotation = catExpanded and 0 or -90
+			CatArrowIcon.Image = catExpanded and ICON_EXPANDED or ICON_COLLAPSED
+			TweenService:Create(CatArrowIcon, TweenInfo.new(0.2), {
+				ImageColor3 = catExpanded and Color3.fromRGB(140, 140, 170) or Color3.fromRGB(80, 80, 110)
 			}):Play()
 			UpdateCatSize()
 		end

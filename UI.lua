@@ -1152,7 +1152,7 @@ function Library:New(config)
 								TweenService:Create(btn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(130, 130, 155)}):Play()
 							end
 							if dot then
-								TweenService:Create(dot, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 65)}):Play()
+								TweenService:Create(dot, TweenInfo.new(0.2), {ImageColor3 = Color3.fromRGB(50, 50, 65)}):Play()
 							end
 							-- Remove highlight bg
 							local hl = subFrame:FindFirstChild("TabHighlightBg")
@@ -1179,7 +1179,7 @@ function Library:New(config)
 			TweenService:Create(tabBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
 		end
 		if tabDot then
-			TweenService:Create(tabDot, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 150, 255)}):Play()
+			TweenService:Create(tabDot, TweenInfo.new(0.2), {ImageColor3 = Color3.fromRGB(80, 150, 255)}):Play()
 		end
 
 		-- Show highlight bg
@@ -1393,15 +1393,18 @@ function Library:New(config)
 				Create("UIStroke", {Color = Color3.fromRGB(80, 150, 255), Thickness = 1, Transparency = 1})
 			})
 
-			-- Small dot indicator
-			local Dot = Create("Frame", {
+			-- Corner arrow icon (lucide corner-down-right)
+			local Dot = Create("ImageLabel", {
 				Name = "Dot",
-				Size = UDim2.fromOffset(5, 5),
-				Position = UDim2.fromOffset(8, 11),
-				BackgroundColor3 = Color3.fromRGB(50, 50, 65),
+				Image = "rbxassetid://10709812485",
+				Size = UDim2.fromOffset(12, 12),
+				Position = UDim2.fromOffset(4, 8),
+				BackgroundTransparency = 1,
+				ImageColor3 = Color3.fromRGB(50, 50, 65),
+				ScaleType = Enum.ScaleType.Fit,
 				ZIndex = 8,
 				Parent = SubTabFrame
-			}, { Create("UICorner", {CornerRadius = UDim.new(1, 0)}) })
+			})
 
 			-- Tab button text
 			local TabBtn = Create("TextButton", {
@@ -1456,13 +1459,13 @@ function Library:New(config)
 			TabBtn.MouseEnter:Connect(function()
 				if Window._activeTabBtn ~= TabBtn then
 					TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(200, 200, 220)}):Play()
-					TweenService:Create(Dot, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(100, 100, 130)}):Play()
+					TweenService:Create(Dot, TweenInfo.new(0.15), {ImageColor3 = Color3.fromRGB(100, 100, 130)}):Play()
 				end
 			end)
 			TabBtn.MouseLeave:Connect(function()
 				if Window._activeTabBtn ~= TabBtn then
 					TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(130, 130, 155)}):Play()
-					TweenService:Create(Dot, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(50, 50, 65)}):Play()
+					TweenService:Create(Dot, TweenInfo.new(0.15), {ImageColor3 = Color3.fromRGB(50, 50, 65)}):Play()
 				end
 			end)
 
@@ -1812,7 +1815,7 @@ function Library:New(config)
 			end
 			Page.Visible = true
 			TweenService:Create(TabBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-			TweenService:Create(Dot, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 150, 255)}):Play()
+			TweenService:Create(Dot, TweenInfo.new(0.2), {ImageColor3 = Color3.fromRGB(80, 150, 255)}):Play()
 		end)
 
 		CreateElementMethods(Tab, Page, UpdateCanvasSize)

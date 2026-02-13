@@ -1541,14 +1541,17 @@ function Library:New(config)
 					Parent = HeaderBtn
 				})
 
-				local SectionArrow = Create("TextLabel", {
-					Text = sExpanded and "▾" or "▸",
-					Font = Enum.Font.GothamBold,
-					TextSize = 14,
-					TextColor3 = Color3.fromRGB(100, 100, 130),
+				local SEC_ICON_COLLAPSED = "rbxassetid://10709768538"  -- lucide arrow-up-down
+				local SEC_ICON_EXPANDED = "rbxassetid://10709768019"   -- lucide arrow-left-right
+
+				local SectionArrow = Create("ImageLabel", {
+					Name = "SectionArrow",
+					Image = sExpanded and SEC_ICON_EXPANDED or SEC_ICON_COLLAPSED,
+					Size = UDim2.fromOffset(14, 14),
+					Position = UDim2.new(1, -28, 0.5, -7),
 					BackgroundTransparency = 1,
-					Position = UDim2.new(1, -30, 0, 0),
-					Size = UDim2.new(0, 20, 1, 0),
+					ImageColor3 = Color3.fromRGB(100, 100, 130),
+					ScaleType = Enum.ScaleType.Fit,
 					ZIndex = 8,
 					Parent = HeaderBtn
 				})
@@ -1628,7 +1631,7 @@ function Library:New(config)
 
 				HeaderBtn.MouseButton1Click:Connect(function()
 					sExpanded = not sExpanded
-					SectionArrow.Text = sExpanded and "▾" or "▸"
+					SectionArrow.Image = sExpanded and SEC_ICON_EXPANDED or SEC_ICON_COLLAPSED
 
 					TweenService:Create(AccentBar, TweenInfo.new(0.2), {
 						BackgroundColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(60, 60, 80)
@@ -1643,7 +1646,7 @@ function Library:New(config)
 					}):Play()
 
 					TweenService:Create(SectionArrow, TweenInfo.new(0.2), {
-						TextColor3 = sExpanded and Color3.fromRGB(100, 100, 130) or Color3.fromRGB(70, 70, 90)
+						ImageColor3 = sExpanded and Color3.fromRGB(100, 100, 130) or Color3.fromRGB(70, 70, 90)
 					}):Play()
 
 					UpdateSectionSize()
@@ -1673,12 +1676,12 @@ function Library:New(config)
 					AccentBar.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
 					IconLabel.ImageColor3 = Color3.fromRGB(100, 100, 130)
 					SectionTitle.TextColor3 = Color3.fromRGB(160, 160, 180)
-					SectionArrow.TextColor3 = Color3.fromRGB(70, 70, 90)
+					SectionArrow.ImageColor3 = Color3.fromRGB(70, 70, 90)
 				end
 
 				function Section:SetExpanded(val)
 					sExpanded = val
-					SectionArrow.Text = sExpanded and "▾" or "▸"
+					SectionArrow.Image = sExpanded and SEC_ICON_EXPANDED or SEC_ICON_COLLAPSED
 					UpdateSectionSize()
 				end
 
@@ -1884,14 +1887,17 @@ function Library:New(config)
 				Parent = HeaderBtn
 			})
 
-			local SectionArrow = Create("TextLabel", {
-				Text = sExpanded and "▾" or "▸",
-				Font = Enum.Font.GothamBold,
-				TextSize = 14,
-				TextColor3 = Color3.fromRGB(100, 100, 130),
+			local SEC_ICON_COLLAPSED2 = "rbxassetid://10709768538"
+			local SEC_ICON_EXPANDED2 = "rbxassetid://10709768019"
+
+			local SectionArrow = Create("ImageLabel", {
+				Name = "SectionArrow",
+				Image = sExpanded and SEC_ICON_EXPANDED2 or SEC_ICON_COLLAPSED2,
+				Size = UDim2.fromOffset(14, 14),
+				Position = UDim2.new(1, -28, 0.5, -7),
 				BackgroundTransparency = 1,
-				Position = UDim2.new(1, -30, 0, 0),
-				Size = UDim2.new(0, 20, 1, 0),
+				ImageColor3 = Color3.fromRGB(100, 100, 130),
+				ScaleType = Enum.ScaleType.Fit,
 				ZIndex = 8,
 				Parent = HeaderBtn
 			})
@@ -1953,10 +1959,11 @@ function Library:New(config)
 
 			HeaderBtn.MouseButton1Click:Connect(function()
 				sExpanded = not sExpanded
-				SectionArrow.Text = sExpanded and "▾" or "▸"
+				SectionArrow.Image = sExpanded and SEC_ICON_EXPANDED2 or SEC_ICON_COLLAPSED2
 				TweenService:Create(AccentBar, TweenInfo.new(0.2), {BackgroundColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(60, 60, 80)}):Play()
 				TweenService:Create(IconLabel, TweenInfo.new(0.2), {ImageColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(100, 100, 130)}):Play()
 				TweenService:Create(SectionTitle, TweenInfo.new(0.2), {TextColor3 = sExpanded and Color3.fromRGB(230, 230, 245) or Color3.fromRGB(160, 160, 180)}):Play()
+				TweenService:Create(SectionArrow, TweenInfo.new(0.2), {ImageColor3 = sExpanded and Color3.fromRGB(100, 100, 130) or Color3.fromRGB(70, 70, 90)}):Play()
 				UpdateSectionSize()
 			end)
 
@@ -1978,7 +1985,7 @@ function Library:New(config)
 				SectionTitle.TextColor3 = Color3.fromRGB(160, 160, 180)
 			end
 
-			function Section:SetExpanded(val) sExpanded = val; SectionArrow.Text = sExpanded and "▾" or "▸"; UpdateSectionSize() end
+			function Section:SetExpanded(val) sExpanded = val; SectionArrow.Image = sExpanded and SEC_ICON_EXPANDED2 or SEC_ICON_COLLAPSED2; UpdateSectionSize() end
 			function Section:IsExpanded() return sExpanded end
 
 			return Section

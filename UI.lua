@@ -1209,6 +1209,7 @@ function Library:New(config)
 	local _categoryOrder = 0
 
 	function self:NewCategory(config)
+		local Window = self -- Store Window reference for closures
 		local catName = config.Name or "Category"
 		local catIcon = config.Icon or DEFAULT_CATEGORY_ICONS[catName] or DEFAULT_SECTION_ICON
 		local defaultOpen = config.Default
@@ -1411,7 +1412,7 @@ function Library:New(config)
 				ScrollBarImageColor3 = Color3.fromRGB(80, 150, 255),
 				CanvasSize = UDim2.new(0, 0, 0, 0),
 				ZIndex = 4,
-				Parent = self.Pages
+				Parent = Window.Pages
 			}, {
 				Create("UIListLayout", {
 					Padding = UDim.new(0, 8),
@@ -1439,13 +1440,13 @@ function Library:New(config)
 
 			-- Hover effects
 			TabBtn.MouseEnter:Connect(function()
-				if self._activeTabBtn ~= TabBtn then
+				if Window._activeTabBtn ~= TabBtn then
 					TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(200, 200, 220)}):Play()
 					TweenService:Create(Dot, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(100, 100, 130)}):Play()
 				end
 			end)
 			TabBtn.MouseLeave:Connect(function()
-				if self._activeTabBtn ~= TabBtn then
+				if Window._activeTabBtn ~= TabBtn then
 					TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(130, 130, 155)}):Play()
 					TweenService:Create(Dot, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(50, 50, 65)}):Play()
 				end

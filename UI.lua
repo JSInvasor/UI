@@ -103,10 +103,10 @@ local DEFAULT_SECTION_ICON = "rbxassetid://10734930886"
 
 -- Default category icons
 local DEFAULT_CATEGORY_ICONS = {
-	["Main"] = "rbxassetid://7733960981",
-	["Combat"] = "rbxassetid://7733960981",
-	["Player"] = "rbxassetid://7733960981",
-	["Misc"] = "rbxassetid://7733960981",
+	["Main"] = "rbxassetid://10734930886",
+	["Combat"] = "rbxassetid://10734930886",
+	["Player"] = "rbxassetid://10734930886",
+	["Misc"] = "rbxassetid://10734930886",
 }
 
 local Library = {}

@@ -99,7 +99,7 @@ local function CreateGridBackground(parent, config)
 end
 
 -- Default section icon (fallback)
-local DEFAULT_SECTION_ICON = "rbxassetid://7733960981"
+local DEFAULT_SECTION_ICON = "rbxassetid://10734930886"
 
 -- Default category icons
 local DEFAULT_CATEGORY_ICONS = {
@@ -507,7 +507,7 @@ function Library:New(config)
 
 			TweenService:Create(Notif.UIStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
 			TweenService:Create(TitleLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-			TweenService:Create(Divider, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+			TweenService:Create(Divider, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
 			TweenService:Create(ContentLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
 
 			hideTween:Play()
@@ -1999,4 +1999,3 @@ function Library:New(config)
 end
 
 return Library
-

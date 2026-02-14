@@ -1270,19 +1270,19 @@ function Library:New(config)
 			Parent = CatHeader
 		})
 
-		-- Arrow Icon (Lucide: arrow-up-down when collapsed, arrow-left-right when expanded)
-		local ICON_COLLAPSED = "rbxassetid://10709768538"  -- lucide arrow-up-down
-		local ICON_EXPANDED = "rbxassetid://10709768019"   -- lucide arrow-left-right
+		-- Arrow Icon (Lucide arrow-up-down, rotates 90° when expanded)
+		local CAT_ARROW_ICON = "rbxassetid://10709768538"  -- lucide arrow-up-down
 
 		local CatArrowIcon = Create("ImageLabel", {
 			Name = "CatArrowIcon",
-			Image = catExpanded and ICON_EXPANDED or ICON_COLLAPSED,
+			Image = CAT_ARROW_ICON,
 			Size = UDim2.fromOffset(12, 12),
 			Position = UDim2.new(1, -20, 0.5, -6),
 			BackgroundTransparency = 1,
-			ImageColor3 = Color3.fromRGB(100, 100, 130),
+			ImageColor3 = Color3.fromRGB(255, 255, 255),
 			ScaleType = Enum.ScaleType.Fit,
 			ZIndex = 8,
+			Rotation = catExpanded and 90 or 0,
 			Parent = CatHeader
 		})
 
@@ -1327,11 +1327,9 @@ function Library:New(config)
 		CatHeader.MouseButton1Click:Connect(function()
 			catExpanded = not catExpanded
 
-			-- Swap Lucide icon
-			CatArrowIcon.Image = catExpanded and ICON_EXPANDED or ICON_COLLAPSED
-
-			TweenService:Create(CatArrowIcon, TweenInfo.new(0.2), {
-				ImageColor3 = catExpanded and Color3.fromRGB(140, 140, 170) or Color3.fromRGB(80, 80, 110)
+			-- Smooth rotate arrow
+			TweenService:Create(CatArrowIcon, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Rotation = catExpanded and 90 or 0
 			}):Play()
 
 			TweenService:Create(CatTitle, TweenInfo.new(0.2), {
@@ -1541,18 +1539,18 @@ function Library:New(config)
 					Parent = HeaderBtn
 				})
 
-				local SEC_ICON_COLLAPSED = "rbxassetid://10709768538"  -- lucide arrow-up-down
-				local SEC_ICON_EXPANDED = "rbxassetid://10709768019"   -- lucide arrow-left-right
+				local SEC_ARROW_ICON = "rbxassetid://10709768538"  -- lucide arrow-up-down
 
 				local SectionArrow = Create("ImageLabel", {
 					Name = "SectionArrow",
-					Image = sExpanded and SEC_ICON_EXPANDED or SEC_ICON_COLLAPSED,
+					Image = SEC_ARROW_ICON,
 					Size = UDim2.fromOffset(14, 14),
 					Position = UDim2.new(1, -28, 0.5, -7),
 					BackgroundTransparency = 1,
-					ImageColor3 = Color3.fromRGB(100, 100, 130),
+					ImageColor3 = Color3.fromRGB(255, 255, 255),
 					ScaleType = Enum.ScaleType.Fit,
 					ZIndex = 8,
+					Rotation = sExpanded and 90 or 0,
 					Parent = HeaderBtn
 				})
 
@@ -1631,7 +1629,11 @@ function Library:New(config)
 
 				HeaderBtn.MouseButton1Click:Connect(function()
 					sExpanded = not sExpanded
-					SectionArrow.Image = sExpanded and SEC_ICON_EXPANDED or SEC_ICON_COLLAPSED
+
+					-- Smooth rotate arrow
+					TweenService:Create(SectionArrow, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+						Rotation = sExpanded and 90 or 0
+					}):Play()
 
 					TweenService:Create(AccentBar, TweenInfo.new(0.2), {
 						BackgroundColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(60, 60, 80)
@@ -1643,10 +1645,6 @@ function Library:New(config)
 
 					TweenService:Create(SectionTitle, TweenInfo.new(0.2), {
 						TextColor3 = sExpanded and Color3.fromRGB(230, 230, 245) or Color3.fromRGB(160, 160, 180)
-					}):Play()
-
-					TweenService:Create(SectionArrow, TweenInfo.new(0.2), {
-						ImageColor3 = sExpanded and Color3.fromRGB(100, 100, 130) or Color3.fromRGB(70, 70, 90)
 					}):Play()
 
 					UpdateSectionSize()
@@ -1676,12 +1674,14 @@ function Library:New(config)
 					AccentBar.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
 					IconLabel.ImageColor3 = Color3.fromRGB(100, 100, 130)
 					SectionTitle.TextColor3 = Color3.fromRGB(160, 160, 180)
-					SectionArrow.ImageColor3 = Color3.fromRGB(70, 70, 90)
+					SectionArrow.Rotation = 0
 				end
 
 				function Section:SetExpanded(val)
 					sExpanded = val
-					SectionArrow.Image = sExpanded and SEC_ICON_EXPANDED or SEC_ICON_COLLAPSED
+					TweenService:Create(SectionArrow, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+						Rotation = sExpanded and 90 or 0
+					}):Play()
 					UpdateSectionSize()
 				end
 
@@ -1709,8 +1709,7 @@ function Library:New(config)
 			end)
 		else
 			CatContainer.Size = UDim2.new(1, 0, 0, 32)
-			CatArrowIcon.Image = ICON_COLLAPSED
-			CatArrowIcon.ImageColor3 = Color3.fromRGB(80, 80, 110)
+			CatArrowIcon.Rotation = 0
 			CatTitle.TextColor3 = Color3.fromRGB(140, 140, 160)
 			CatIcon.ImageColor3 = Color3.fromRGB(100, 100, 130)
 		end
@@ -1718,9 +1717,8 @@ function Library:New(config)
 		-- Category API
 		function Category:SetExpanded(val)
 			catExpanded = val
-			CatArrowIcon.Image = catExpanded and ICON_EXPANDED or ICON_COLLAPSED
-			TweenService:Create(CatArrowIcon, TweenInfo.new(0.2), {
-				ImageColor3 = catExpanded and Color3.fromRGB(140, 140, 170) or Color3.fromRGB(80, 80, 110)
+			TweenService:Create(CatArrowIcon, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+				Rotation = catExpanded and 90 or 0
 			}):Play()
 			UpdateCatSize()
 		end
@@ -1887,18 +1885,18 @@ function Library:New(config)
 				Parent = HeaderBtn
 			})
 
-			local SEC_ICON_COLLAPSED2 = "rbxassetid://10709768538"
-			local SEC_ICON_EXPANDED2 = "rbxassetid://10709768019"
+			local SEC_ARROW_ICON2 = "rbxassetid://10709768538"
 
 			local SectionArrow = Create("ImageLabel", {
 				Name = "SectionArrow",
-				Image = sExpanded and SEC_ICON_EXPANDED2 or SEC_ICON_COLLAPSED2,
+				Image = SEC_ARROW_ICON2,
 				Size = UDim2.fromOffset(14, 14),
 				Position = UDim2.new(1, -28, 0.5, -7),
 				BackgroundTransparency = 1,
-				ImageColor3 = Color3.fromRGB(100, 100, 130),
+				ImageColor3 = Color3.fromRGB(255, 255, 255),
 				ScaleType = Enum.ScaleType.Fit,
 				ZIndex = 8,
+				Rotation = sExpanded and 90 or 0,
 				Parent = HeaderBtn
 			})
 
@@ -1959,11 +1957,10 @@ function Library:New(config)
 
 			HeaderBtn.MouseButton1Click:Connect(function()
 				sExpanded = not sExpanded
-				SectionArrow.Image = sExpanded and SEC_ICON_EXPANDED2 or SEC_ICON_COLLAPSED2
+				TweenService:Create(SectionArrow, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Rotation = sExpanded and 90 or 0}):Play()
 				TweenService:Create(AccentBar, TweenInfo.new(0.2), {BackgroundColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(60, 60, 80)}):Play()
 				TweenService:Create(IconLabel, TweenInfo.new(0.2), {ImageColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(100, 100, 130)}):Play()
 				TweenService:Create(SectionTitle, TweenInfo.new(0.2), {TextColor3 = sExpanded and Color3.fromRGB(230, 230, 245) or Color3.fromRGB(160, 160, 180)}):Play()
-				TweenService:Create(SectionArrow, TweenInfo.new(0.2), {ImageColor3 = sExpanded and Color3.fromRGB(100, 100, 130) or Color3.fromRGB(70, 70, 90)}):Play()
 				UpdateSectionSize()
 			end)
 
@@ -1985,7 +1982,11 @@ function Library:New(config)
 				SectionTitle.TextColor3 = Color3.fromRGB(160, 160, 180)
 			end
 
-			function Section:SetExpanded(val) sExpanded = val; SectionArrow.Image = sExpanded and SEC_ICON_EXPANDED2 or SEC_ICON_COLLAPSED2; UpdateSectionSize() end
+			function Section:SetExpanded(val)
+				sExpanded = val
+				TweenService:Create(SectionArrow, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Rotation = sExpanded and 90 or 0}):Play()
+				UpdateSectionSize()
+			end
 			function Section:IsExpanded() return sExpanded end
 
 			return Section

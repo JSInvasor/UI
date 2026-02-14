@@ -540,7 +540,7 @@ function Library:New(config)
 				Text = text,
 				Font = Enum.Font.GothamMedium,
 				TextSize = 14,
-				TextColor3 = Color3.fromRGB(170, 170, 195),
+				TextColor3 = Color3.fromRGB(200, 200, 220),
 				BackgroundTransparency = 1,
 				Position = UDim2.fromOffset(15, 0),
 				Size = UDim2.new(1, -100, 1, 0),
@@ -601,7 +601,7 @@ function Library:New(config)
 				Text = text,
 				Font = Enum.Font.GothamMedium,
 				TextSize = 14,
-				TextColor3 = Color3.fromRGB(170, 170, 195),
+				TextColor3 = Color3.fromRGB(200, 200, 220),
 				BackgroundTransparency = 1,
 				Position = UDim2.fromOffset(15, 0),
 				Size = UDim2.new(1, -70, 1, 0),
@@ -677,7 +677,7 @@ function Library:New(config)
 				Text = text,
 				Font = Enum.Font.GothamMedium,
 				TextSize = 14,
-				TextColor3 = Color3.fromRGB(170, 170, 195),
+				TextColor3 = Color3.fromRGB(200, 200, 220),
 				BackgroundTransparency = 1,
 				Position = UDim2.fromOffset(15, 8),
 				Size = UDim2.new(1, -100, 0, 20),
@@ -772,7 +772,7 @@ function Library:New(config)
 				Text = text,
 				Font = Enum.Font.GothamMedium,
 				TextSize = 14,
-				TextColor3 = Color3.fromRGB(170, 170, 195),
+				TextColor3 = Color3.fromRGB(200, 200, 220),
 				BackgroundTransparency = 1,
 				Position = UDim2.fromOffset(15, 0),
 				Size = UDim2.new(1, -50, 1, 0),
@@ -995,7 +995,7 @@ function Library:New(config)
 				Text = text,
 				Font = Enum.Font.GothamMedium,
 				TextSize = 13,
-				TextColor3 = Color3.fromRGB(170, 170, 195),
+				TextColor3 = Color3.fromRGB(200, 200, 220),
 				BackgroundTransparency = 1,
 				Position = UDim2.fromOffset(15, 0),
 				Size = UDim2.new(1, -85, 1, 0),
@@ -1072,7 +1072,7 @@ function Library:New(config)
 				Text = text,
 				Font = Enum.Font.GothamMedium,
 				TextSize = 13,
-				TextColor3 = Color3.fromRGB(170, 170, 195),
+				TextColor3 = Color3.fromRGB(200, 200, 220),
 				BackgroundTransparency = 1,
 				Position = UDim2.fromOffset(15, 0),
 				Size = UDim2.new(1, -80, 1, 0),
@@ -1187,7 +1187,7 @@ function Library:New(config)
 		if subFrame then
 			local hl = subFrame:FindFirstChild("TabHighlightBg")
 			if hl then
-				TweenService:Create(hl, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundTransparency = 0.88}):Play()
+				TweenService:Create(hl, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {BackgroundTransparency = 0.82}):Play()
 				local hlStroke = hl:FindFirstChildOfClass("UIStroke")
 				if hlStroke then
 					TweenService:Create(hlStroke, TweenInfo.new(0.25), {Transparency = 0.5}):Play()
@@ -1223,7 +1223,7 @@ function Library:New(config)
 		-- Category container (holds header + sub tabs)
 		local CatContainer = Create("Frame", {
 			Name = "Cat_" .. catName,
-			Size = UDim2.new(1, 0, 0, 30), -- Will auto-resize
+			Size = UDim2.new(1, 0, 0, 28), -- Will auto-resize
 			BackgroundTransparency = 1,
 			ClipsDescendants = true,
 			LayoutOrder = _categoryOrder,
@@ -1231,25 +1231,21 @@ function Library:New(config)
 			Parent = self.TabHolder
 		})
 
-		-- Category header button
+		-- Category header button (Flow style - no background)
 		local CatHeader = Create("TextButton", {
 			Name = "CatHeader",
-			Size = UDim2.new(1, 0, 0, 30),
-			BackgroundColor3 = Color3.fromRGB(20, 20, 28),
-			BackgroundTransparency = 0.3,
+			Size = UDim2.new(1, 0, 0, 28),
+			BackgroundTransparency = 1,
 			Text = "",
 			ZIndex = 7,
 			Parent = CatContainer
-		}, {
-			Create("UICorner", {CornerRadius = UDim.new(0, 6)}),
-			Create("UIStroke", {Color = Color3.fromRGB(55, 55, 70), Thickness = 1, Transparency = 0.3})
 		})
 
-		-- Category icon (left side - accent colored)
+		-- Category icon (left, accent blue)
 		local CatIcon = Create("ImageLabel", {
 			Image = catIcon,
-			Size = UDim2.fromOffset(13, 13),
-			Position = UDim2.fromOffset(8, 8),
+			Size = UDim2.fromOffset(14, 14),
+			Position = UDim2.fromOffset(4, 7),
 			BackgroundTransparency = 1,
 			ImageColor3 = Color3.fromRGB(80, 150, 255),
 			ScaleType = Enum.ScaleType.Fit,
@@ -1257,28 +1253,28 @@ function Library:New(config)
 			Parent = CatHeader
 		})
 
-		-- Category title (centered, uppercase)
+		-- Category title (bold, left-aligned next to icon)
 		local CatTitle = Create("TextLabel", {
-			Text = string.upper(catName),
+			Text = catName,
 			Font = Enum.Font.GothamBold,
-			TextSize = 11,
-			TextColor3 = Color3.fromRGB(160, 160, 180),
+			TextSize = 13,
+			TextColor3 = Color3.fromRGB(220, 220, 240),
 			BackgroundTransparency = 1,
-			Position = UDim2.fromOffset(26, 0),
-			Size = UDim2.new(1, -48, 1, 0),
-			TextXAlignment = "Center",
+			Position = UDim2.fromOffset(24, 0),
+			Size = UDim2.new(1, -50, 1, 0),
+			TextXAlignment = "Left",
 			ZIndex = 8,
 			Parent = CatHeader
 		})
 
-		-- Arrow Icon (Lucide arrow-up-down, rotates 90 when expanded)
+		-- Arrow Icon (Lucide arrow-up-down, rotates smoothly)
 		local CAT_ARROW_ICON = "rbxassetid://10709768538"
 
 		local CatArrowIcon = Create("ImageLabel", {
 			Name = "CatArrowIcon",
 			Image = CAT_ARROW_ICON,
-			Size = UDim2.fromOffset(10, 10),
-			Position = UDim2.new(1, -18, 0.5, -5),
+			Size = UDim2.fromOffset(12, 12),
+			Position = UDim2.new(1, -18, 0.5, -6),
 			BackgroundTransparency = 1,
 			ImageColor3 = Color3.fromRGB(255, 255, 255),
 			ImageTransparency = 0.3,
@@ -1292,7 +1288,7 @@ function Library:New(config)
 		local SubTabHolder = Create("Frame", {
 			Name = "SubTabHolder",
 			Size = UDim2.new(1, 0, 0, 0), -- Auto-sized
-			Position = UDim2.fromOffset(0, 34),
+			Position = UDim2.fromOffset(0, 30),
 			BackgroundTransparency = 1,
 			ZIndex = 5,
 			Parent = CatContainer
@@ -1309,9 +1305,9 @@ function Library:New(config)
 			local contentHeight = subLayout.AbsoluteContentSize.Y
 			local targetHeight
 			if catExpanded then
-				targetHeight = 34 + contentHeight + 4
+				targetHeight = 30 + contentHeight + 4
 			else
-				targetHeight = 30
+				targetHeight = 28
 			end
 
 			TweenService:Create(CatContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
@@ -1335,7 +1331,7 @@ function Library:New(config)
 			}):Play()
 
 			TweenService:Create(CatTitle, TweenInfo.new(0.2), {
-				TextColor3 = catExpanded and Color3.fromRGB(160, 160, 180) or Color3.fromRGB(120, 120, 145)
+				TextColor3 = catExpanded and Color3.fromRGB(220, 220, 240) or Color3.fromRGB(140, 140, 165)
 			}):Play()
 
 			TweenService:Create(CatIcon, TweenInfo.new(0.2), {
@@ -1347,29 +1343,23 @@ function Library:New(config)
 
 		-- Hover effect on header
 		CatHeader.MouseEnter:Connect(function()
-			TweenService:Create(CatHeader, TweenInfo.new(0.15), {
-				BackgroundTransparency = 0.1
-			}):Play()
 			TweenService:Create(CatTitle, TweenInfo.new(0.15), {
-				TextColor3 = Color3.fromRGB(220, 220, 235)
+				TextColor3 = Color3.fromRGB(255, 255, 255)
 			}):Play()
 			TweenService:Create(CatArrowIcon, TweenInfo.new(0.15), {
-				ImageTransparency = 0.1
+				ImageTransparency = 0
 			}):Play()
 		end)
 		CatHeader.MouseLeave:Connect(function()
-			TweenService:Create(CatHeader, TweenInfo.new(0.15), {
-				BackgroundTransparency = 0.3
-			}):Play()
 			TweenService:Create(CatTitle, TweenInfo.new(0.15), {
-				TextColor3 = Color3.fromRGB(160, 160, 180)
+				TextColor3 = Color3.fromRGB(220, 220, 240)
 			}):Play()
 			TweenService:Create(CatArrowIcon, TweenInfo.new(0.15), {
 				ImageTransparency = 0.3
 			}):Play()
 		end)
 
-		-- ============================================
+				-- ============================================
 		-- Category:NewTab - Creates a sub-tab under this category
 		-- ============================================
 		function Category:NewTab(name)
@@ -1379,7 +1369,7 @@ function Library:New(config)
 			-- Sub tab frame in sidebar
 			local SubTabFrame = Create("Frame", {
 				Name = "SubTab_" .. name,
-				Size = UDim2.new(1, -6, 0, 26),
+				Size = UDim2.new(1, -6, 0, 28),
 				BackgroundTransparency = 1,
 				LayoutOrder = subTabOrder,
 				ZIndex = 6,
@@ -1406,7 +1396,7 @@ function Library:New(config)
 				Size = UDim2.fromOffset(10, 10),
 				Position = UDim2.fromOffset(6, 8),
 				BackgroundTransparency = 1,
-				ImageColor3 = Color3.fromRGB(50, 50, 65),
+				ImageColor3 = Color3.fromRGB(70, 70, 95),
 				ScaleType = Enum.ScaleType.Fit,
 				ZIndex = 8,
 				Parent = SubTabFrame
@@ -1416,8 +1406,8 @@ function Library:New(config)
 			local TabBtn = Create("TextButton", {
 				Text = name,
 				Font = Enum.Font.GothamMedium,
-				TextSize = 11,
-				TextColor3 = Color3.fromRGB(110, 110, 135),
+				TextSize = 12,
+				TextColor3 = Color3.fromRGB(140, 140, 165),
 				BackgroundTransparency = 1,
 				Position = UDim2.fromOffset(20, 0),
 				Size = UDim2.new(1, -20, 1, 0),
@@ -1464,7 +1454,7 @@ function Library:New(config)
 			-- Hover effects
 			TabBtn.MouseEnter:Connect(function()
 				if Window._activeTabBtn ~= TabBtn then
-					TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(170, 170, 195)}):Play()
+					TweenService:Create(TabBtn, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(200, 200, 220)}):Play()
 					TweenService:Create(Dot, TweenInfo.new(0.15), {ImageColor3 = Color3.fromRGB(100, 100, 130)}):Play()
 				end
 			end)
@@ -1716,7 +1706,7 @@ function Library:New(config)
 				UpdateCatSize()
 			end)
 		else
-			CatContainer.Size = UDim2.new(1, 0, 0, 30)
+			CatContainer.Size = UDim2.new(1, 0, 0, 28)
 			CatArrowIcon.Rotation = 0
 			CatTitle.TextColor3 = Color3.fromRGB(140, 140, 160)
 			CatIcon.ImageColor3 = Color3.fromRGB(100, 100, 130)

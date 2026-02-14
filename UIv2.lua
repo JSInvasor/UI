@@ -1223,7 +1223,7 @@ function Library:New(config)
 		-- Category container (holds header + sub tabs)
 		local CatContainer = Create("Frame", {
 			Name = "Cat_" .. catName,
-			Size = UDim2.new(1, 0, 0, 26), -- Will auto-resize
+			Size = UDim2.new(1, 0, 0, 30), -- Will auto-resize
 			BackgroundTransparency = 1,
 			ClipsDescendants = true,
 			LayoutOrder = _categoryOrder,
@@ -1234,29 +1234,22 @@ function Library:New(config)
 		-- Category header button
 		local CatHeader = Create("TextButton", {
 			Name = "CatHeader",
-			Size = UDim2.new(1, 0, 0, 26),
-			BackgroundTransparency = 1,
+			Size = UDim2.new(1, 0, 0, 30),
+			BackgroundColor3 = Color3.fromRGB(20, 20, 28),
+			BackgroundTransparency = 0.3,
 			Text = "",
 			ZIndex = 7,
 			Parent = CatContainer
-		})
-
-		-- Subtle bottom separator line
-		local CatSeparator = Create("Frame", {
-			Name = "CatSep",
-			Size = UDim2.new(1, -12, 0, 1),
-			Position = UDim2.new(0, 6, 1, -1),
-			BackgroundColor3 = Color3.fromRGB(40, 40, 55),
-			BorderSizePixel = 0,
-			ZIndex = 7,
-			Parent = CatHeader
+		}, {
+			Create("UICorner", {CornerRadius = UDim.new(0, 6)}),
+			Create("UIStroke", {Color = Color3.fromRGB(55, 55, 70), Thickness = 1, Transparency = 0.3})
 		})
 
 		-- Category icon (left side - accent colored)
 		local CatIcon = Create("ImageLabel", {
 			Image = catIcon,
-			Size = UDim2.fromOffset(12, 12),
-			Position = UDim2.fromOffset(6, 7),
+			Size = UDim2.fromOffset(13, 13),
+			Position = UDim2.fromOffset(8, 8),
 			BackgroundTransparency = 1,
 			ImageColor3 = Color3.fromRGB(80, 150, 255),
 			ScaleType = Enum.ScaleType.Fit,
@@ -1264,15 +1257,15 @@ function Library:New(config)
 			Parent = CatHeader
 		})
 
-		-- Category title (centered, uppercase, subtle)
+		-- Category title (centered, uppercase)
 		local CatTitle = Create("TextLabel", {
 			Text = string.upper(catName),
-			Font = Enum.Font.GothamMedium,
-			TextSize = 10,
-			TextColor3 = Color3.fromRGB(120, 120, 145),
+			Font = Enum.Font.GothamBold,
+			TextSize = 11,
+			TextColor3 = Color3.fromRGB(160, 160, 180),
 			BackgroundTransparency = 1,
-			Position = UDim2.fromOffset(22, 0),
-			Size = UDim2.new(1, -44, 1, 0),
+			Position = UDim2.fromOffset(26, 0),
+			Size = UDim2.new(1, -48, 1, 0),
 			TextXAlignment = "Center",
 			ZIndex = 8,
 			Parent = CatHeader
@@ -1285,21 +1278,21 @@ function Library:New(config)
 			Name = "CatArrowIcon",
 			Image = CAT_ARROW_ICON,
 			Size = UDim2.fromOffset(10, 10),
-			Position = UDim2.new(1, -16, 0.5, -5),
+			Position = UDim2.new(1, -18, 0.5, -5),
 			BackgroundTransparency = 1,
 			ImageColor3 = Color3.fromRGB(255, 255, 255),
-			ImageTransparency = 0.4,
+			ImageTransparency = 0.3,
 			ScaleType = Enum.ScaleType.Fit,
 			ZIndex = 8,
 			Rotation = catExpanded and 90 or 0,
 			Parent = CatHeader
 		})
 
-		-- Sub tab holder (tabs go here)
+				-- Sub tab holder (tabs go here)
 		local SubTabHolder = Create("Frame", {
 			Name = "SubTabHolder",
 			Size = UDim2.new(1, 0, 0, 0), -- Auto-sized
-			Position = UDim2.fromOffset(0, 28),
+			Position = UDim2.fromOffset(0, 34),
 			BackgroundTransparency = 1,
 			ZIndex = 5,
 			Parent = CatContainer
@@ -1316,9 +1309,9 @@ function Library:New(config)
 			local contentHeight = subLayout.AbsoluteContentSize.Y
 			local targetHeight
 			if catExpanded then
-				targetHeight = 28 + contentHeight + 4
+				targetHeight = 34 + contentHeight + 4
 			else
-				targetHeight = 26
+				targetHeight = 30
 			end
 
 			TweenService:Create(CatContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
@@ -1342,7 +1335,7 @@ function Library:New(config)
 			}):Play()
 
 			TweenService:Create(CatTitle, TweenInfo.new(0.2), {
-				TextColor3 = catExpanded and Color3.fromRGB(120, 120, 145) or Color3.fromRGB(90, 90, 110)
+				TextColor3 = catExpanded and Color3.fromRGB(160, 160, 180) or Color3.fromRGB(120, 120, 145)
 			}):Play()
 
 			TweenService:Create(CatIcon, TweenInfo.new(0.2), {
@@ -1354,19 +1347,25 @@ function Library:New(config)
 
 		-- Hover effect on header
 		CatHeader.MouseEnter:Connect(function()
+			TweenService:Create(CatHeader, TweenInfo.new(0.15), {
+				BackgroundTransparency = 0.1
+			}):Play()
 			TweenService:Create(CatTitle, TweenInfo.new(0.15), {
-				TextColor3 = Color3.fromRGB(180, 180, 200)
+				TextColor3 = Color3.fromRGB(220, 220, 235)
 			}):Play()
 			TweenService:Create(CatArrowIcon, TweenInfo.new(0.15), {
 				ImageTransparency = 0.1
 			}):Play()
 		end)
 		CatHeader.MouseLeave:Connect(function()
+			TweenService:Create(CatHeader, TweenInfo.new(0.15), {
+				BackgroundTransparency = 0.3
+			}):Play()
 			TweenService:Create(CatTitle, TweenInfo.new(0.15), {
-				TextColor3 = catExpanded and Color3.fromRGB(120, 120, 145) or Color3.fromRGB(90, 90, 110)
+				TextColor3 = Color3.fromRGB(160, 160, 180)
 			}):Play()
 			TweenService:Create(CatArrowIcon, TweenInfo.new(0.15), {
-				ImageTransparency = 0.4
+				ImageTransparency = 0.3
 			}):Play()
 		end)
 
@@ -1717,7 +1716,7 @@ function Library:New(config)
 				UpdateCatSize()
 			end)
 		else
-			CatContainer.Size = UDim2.new(1, 0, 0, 26)
+			CatContainer.Size = UDim2.new(1, 0, 0, 30)
 			CatArrowIcon.Rotation = 0
 			CatTitle.TextColor3 = Color3.fromRGB(140, 140, 160)
 			CatIcon.ImageColor3 = Color3.fromRGB(100, 100, 130)

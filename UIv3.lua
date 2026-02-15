@@ -231,38 +231,11 @@ function Library:New(config)
 	-- ============================================
 	self.Sidebar = Create("Frame", {
 		Size = UDim2.new(0, 150, 1, -16), Position = UDim2.fromOffset(10, 8),
-		BackgroundColor3 = Color3.fromRGB(18, 18, 26), ZIndex = 3, Parent = self.Container
+		BackgroundTransparency = 1, ZIndex = 3, Parent = self.Container
 	}, {
 		Create("UICorner", {CornerRadius = UDim.new(0, 10)}),
-		Create("UIStroke", {Color = Color3.fromRGB(40, 42, 58), Thickness = 1}),
+		Create("UIStroke", {Color = Color3.fromRGB(40, 42, 58), Thickness = 1, Transparency = 0.5}),
 	})
-
-	-- Sidebar gradient overlay (very subtle, grid visible)
-	local SidebarGrad = Create("Frame", {
-		Name = "SidebarGrad", Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Color3.fromRGB(60, 100, 200), BackgroundTransparency = 0.985,
-		BorderSizePixel = 0, ZIndex = 3, Parent = self.Sidebar
-	})
-	local sg = Instance.new("UIGradient")
-	sg.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 120, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 18, 26))
-	})
-	sg.Rotation = 180
-	sg.Parent = SidebarGrad
-	Create("UICorner", {CornerRadius = UDim.new(0, 10), Parent = SidebarGrad})
-
-	-- Top glow (subtle)
-	local SidebarGlow = Create("Frame", {
-		Name = "SidebarGlow", Size = UDim2.new(1, 0, 0, 50),
-		BackgroundColor3 = Color3.fromRGB(60, 120, 255), BackgroundTransparency = 0.95,
-		BorderSizePixel = 0, ZIndex = 3, Parent = self.Sidebar
-	})
-	local gg = Instance.new("UIGradient")
-	gg.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1)})
-	gg.Rotation = 90
-	gg.Parent = SidebarGlow
-	Create("UICorner", {CornerRadius = UDim.new(0, 10), Parent = SidebarGlow})
 
 	self.SidebarScroll = Create("ScrollingFrame", {
 		Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1,

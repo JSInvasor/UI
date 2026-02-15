@@ -89,13 +89,13 @@ local ICONS = {
 local DEFAULT_SECTION_ICON = ICONS.Zap
 
 local DEFAULT_CATEGORY_ICONS = {
-	["Main"] = ICONS.Sword,
-	["Combat"] = ICONS.Sword,
-	["Player"] = ICONS.Shield,
-	["Misc"] = ICONS.Gear,
-	["Settings"] = ICONS.Gear,
-	["Visuals"] = ICONS.Eye,
-	["Config"] = ICONS.Layers,
+	["Main"] = ICONS.Puzzle,
+	["Combat"] = ICONS.Puzzle,
+	["Player"] = ICONS.Puzzle,
+	["Misc"] = ICONS.Puzzle,
+	["Settings"] = ICONS.Puzzle,
+	["Visuals"] = ICONS.Puzzle,
+	["Config"] = ICONS.Puzzle,
 }
 
 local Library = {}
@@ -237,10 +237,10 @@ function Library:New(config)
 		Create("UIStroke", {Color = Color3.fromRGB(40, 42, 58), Thickness = 1}),
 	})
 
-	-- Sidebar gradient overlay
+	-- Sidebar gradient overlay (very subtle, grid visible)
 	local SidebarGrad = Create("Frame", {
 		Name = "SidebarGrad", Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = Color3.fromRGB(60, 100, 200), BackgroundTransparency = 0.96,
+		BackgroundColor3 = Color3.fromRGB(60, 100, 200), BackgroundTransparency = 0.985,
 		BorderSizePixel = 0, ZIndex = 3, Parent = self.Sidebar
 	})
 	local sg = Instance.new("UIGradient")
@@ -252,10 +252,10 @@ function Library:New(config)
 	sg.Parent = SidebarGrad
 	Create("UICorner", {CornerRadius = UDim.new(0, 10), Parent = SidebarGrad})
 
-	-- Top glow
+	-- Top glow (subtle)
 	local SidebarGlow = Create("Frame", {
 		Name = "SidebarGlow", Size = UDim2.new(1, 0, 0, 50),
-		BackgroundColor3 = Color3.fromRGB(60, 120, 255), BackgroundTransparency = 0.9,
+		BackgroundColor3 = Color3.fromRGB(60, 120, 255), BackgroundTransparency = 0.95,
 		BorderSizePixel = 0, ZIndex = 3, Parent = self.Sidebar
 	})
 	local gg = Instance.new("UIGradient")

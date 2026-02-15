@@ -643,15 +643,10 @@ function Library:New(config)
 
 		local SC = Create("Frame", {
 			Name = "Section_" .. sectionName, Size = UDim2.new(1, 0, 0, 40),
-			BackgroundColor3 = Color3.fromRGB(18, 18, 25), ClipsDescendants = true, ZIndex = 5, Parent = Page
-		}, { Create("UICorner", {CornerRadius = UDim.new(0, 10)}), Create("UIStroke", {Color = Color3.fromRGB(45, 45, 60), Thickness = 1}) })
+			BackgroundTransparency = 1, ClipsDescendants = true, ZIndex = 5, Parent = Page
+		}, { Create("UICorner", {CornerRadius = UDim.new(0, 10)}), Create("UIStroke", {Color = Color3.fromRGB(45, 45, 60), Thickness = 1, Transparency = 0.5}) })
 
 		local HB = Create("TextButton", {Size = UDim2.new(1, 0, 0, 40), BackgroundTransparency = 1, Text = "", ZIndex = 7, Parent = SC})
-
-		Create("Frame", {
-			Size = UDim2.new(0, 3, 0, 20), Position = UDim2.fromOffset(0, 10),
-			BackgroundColor3 = Color3.fromRGB(80, 150, 255), BorderSizePixel = 0, ZIndex = 8, Parent = HB
-		}, { Create("UICorner", {CornerRadius = UDim.new(0, 2)}) })
 
 		local IL = Create("ImageLabel", {
 			Image = icon, Size = UDim2.fromOffset(16, 16), Position = UDim2.new(0, 14, 0.5, -8),
@@ -692,8 +687,6 @@ function Library:New(config)
 		})
 
 		local CL = CH:FindFirstChildOfClass("UIListLayout")
-		local AB = HB:FindFirstChild("Frame")
-
 		local function USS()
 			local ch = CL.AbsoluteContentSize.Y + 12
 			TweenService:Create(SC, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, sExpanded and (headerHeight + 4 + ch) or headerHeight)}):Play()
@@ -706,19 +699,18 @@ function Library:New(config)
 		HB.MouseButton1Click:Connect(function()
 			sExpanded = not sExpanded
 			TweenService:Create(SA, TweenInfo.new(0.35, Enum.EasingStyle.Quart), {Rotation = sExpanded and 90 or 0}):Play()
-			if AB then TweenService:Create(AB, TweenInfo.new(0.2), {BackgroundColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(60, 60, 80)}):Play() end
 			TweenService:Create(IL, TweenInfo.new(0.2), {ImageColor3 = sExpanded and Color3.fromRGB(80, 150, 255) or Color3.fromRGB(100, 100, 130)}):Play()
 			TweenService:Create(ST, TweenInfo.new(0.2), {TextColor3 = sExpanded and Color3.fromRGB(230, 230, 245) or Color3.fromRGB(160, 160, 180)}):Play()
 			USS()
 		end)
 
-		HB.MouseEnter:Connect(function() TweenService:Create(SC, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(22, 22, 30)}):Play() end)
-		HB.MouseLeave:Connect(function() TweenService:Create(SC, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(18, 18, 25)}):Play() end)
+		HB.MouseEnter:Connect(function() TweenService:Create(ST, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play() end)
+		HB.MouseLeave:Connect(function() TweenService:Create(ST, TweenInfo.new(0.15), {TextColor3 = sExpanded and Color3.fromRGB(230, 230, 245) or Color3.fromRGB(160, 160, 180)}):Play() end)
 
 		CreateElementMethods(Section, CH, UpdateCanvasSize)
 
 		if sExpanded then task.spawn(function() task.wait(0.1); USS() end)
-		else SC.Size = UDim2.new(1, 0, 0, headerHeight); if AB then AB.BackgroundColor3 = Color3.fromRGB(60, 60, 80) end; IL.ImageColor3 = Color3.fromRGB(100, 100, 130); ST.TextColor3 = Color3.fromRGB(160, 160, 180); SA.Rotation = 0 end
+		else SC.Size = UDim2.new(1, 0, 0, headerHeight); IL.ImageColor3 = Color3.fromRGB(100, 100, 130); ST.TextColor3 = Color3.fromRGB(160, 160, 180); SA.Rotation = 0 end
 
 		function Section:SetExpanded(val) sExpanded = val; TweenService:Create(SA, TweenInfo.new(0.35, Enum.EasingStyle.Quart), {Rotation = sExpanded and 90 or 0}):Play(); USS() end
 		function Section:IsExpanded() return sExpanded end

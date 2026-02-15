@@ -747,17 +747,9 @@ function Library:New(config)
 
 		local CH = Create("TextButton", {
 			Name = "CatHeader", Size = UDim2.new(1, 0, 0, 34),
-			BackgroundColor3 = Color3.fromRGB(22, 24, 34), BackgroundTransparency = 0.3,
+			BackgroundTransparency = 1,
 			Text = "", ZIndex = 7, Parent = CC
 		}, { Create("UICorner", {CornerRadius = UDim.new(0, 8)}) })
-
-		-- Subtle gradient on category header
-		local chGrad = Instance.new("UIGradient")
-		chGrad.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(28, 32, 48)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(22, 24, 34))
-		})
-		chGrad.Parent = CH
 
 		local CI = Create("ImageLabel", {
 			Image = catIcon, Size = UDim2.fromOffset(14, 14), Position = UDim2.fromOffset(10, 10),
@@ -807,8 +799,8 @@ function Library:New(config)
 			UpdateCatSize()
 		end)
 
-		CH.MouseEnter:Connect(function() TweenService:Create(CT, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play(); TweenService:Create(CH, TweenInfo.new(0.15), {BackgroundTransparency = 0.15}):Play() end)
-		CH.MouseLeave:Connect(function() TweenService:Create(CT, TweenInfo.new(0.15), {TextColor3 = catExpanded and Color3.fromRGB(220, 220, 235) or Color3.fromRGB(140, 140, 160)}):Play(); TweenService:Create(CH, TweenInfo.new(0.15), {BackgroundTransparency = 0.3}):Play() end)
+		CH.MouseEnter:Connect(function() TweenService:Create(CT, TweenInfo.new(0.15), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play(); TweenService:Create(CH, TweenInfo.new(0.15), {BackgroundTransparency = 0.7}):Play() end)
+		CH.MouseLeave:Connect(function() TweenService:Create(CT, TweenInfo.new(0.15), {TextColor3 = catExpanded and Color3.fromRGB(220, 220, 235) or Color3.fromRGB(140, 140, 160)}):Play(); TweenService:Create(CH, TweenInfo.new(0.15), {BackgroundTransparency = 1}):Play() end)
 
 		function Category:NewTab(name)
 			local Tab = {}

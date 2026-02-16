@@ -650,7 +650,7 @@ function Library:New(config)
 
 		local IL = Create("ImageLabel", {
 			Image = icon, Size = UDim2.fromOffset(16, 16), Position = UDim2.new(0, 14, 0.5, -8),
-			BackgroundTransparency = 1, ImageColor3 = Color3.fromRGB(80, 150, 255), ScaleType = Enum.ScaleType.Fit,
+			BackgroundTransparency = 1, ImageColor3 = Color3.fromRGB(255, 255, 255), ScaleType = Enum.ScaleType.Fit,
 			ZIndex = 8, Parent = HB
 		})
 
@@ -914,3 +914,4 @@ function Library:New(config)
 end
 
 return Library
+
